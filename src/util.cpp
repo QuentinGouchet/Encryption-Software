@@ -45,3 +45,15 @@ buff_t Util::convert(mpz_t n,unsigned int flag) {
     return Ex;
 }
 
+void Util::printBuff(unsigned char *buf, int size)
+{
+    unsigned char *p = buf;
+    int len = size;
+
+    while(len--)
+        fprintf(stdout, "%02x ", *p++);
+    fprintf(stdout, "\n");
+
+    return ;
+}
+

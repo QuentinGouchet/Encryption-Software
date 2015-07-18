@@ -17,6 +17,7 @@ class Util
 {
     public:
         static buff_t convert(mpz_t,unsigned int);
+        void printBuff(unsigned char *, int);
 };
 
 #endif // UTIL_H

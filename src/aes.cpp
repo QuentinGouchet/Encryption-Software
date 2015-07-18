@@ -55,23 +55,25 @@ int AES::aes_cbc_128(const char *plaintextPath, const char *keyPath,
     FILE *ciphertextFile = NULL;
     FILE *keyFile = NULL;
 
+    int blklen = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES);
+
     unsigned char *fileContent = NULL;
     unsigned char *ciphertext = NULL;
 
-    unsigned char tmp[17];
-
     char pathCipherFile[50];
     char pathKeyFile[50];
+    unsigned char *key;
 
     long fsize = 0;
     int plaintext_len, ciphertext_len, i;
 
-    int blklen = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES);
-
-    unsigned char key[blklen];
-
     gcry_cipher_hd_t hd = NULL;
     gcry_error_t err = 0;
+
+    Util print;
+
+    printf("iv: ");
+    print.printBuff((unsigned char *)iv, blklen);
 
     if((plaintextFile = fopen(plaintextPath, "r")) == NULL)
     {
@@ -80,138 +82,152 @@ int AES::aes_cbc_128(const char *plaintextPath, const char *keyPath,
         goto out;
     }
 
-        if(fseek(plaintextFile, 0, SEEK_END))
-        {
-            err = 1;
-            fprintf(stderr, "fseek() failure on plaintext file\n");
-            goto out;
-        }
+    if(fseek(plaintextFile, 0, SEEK_END))
+    {
+        err = 1;
+        fprintf(stderr, "fseek() failure on plaintext file\n");
+        goto out;
+    }
 
-        if((fsize = ftell(plaintextFile)) == -1L)
-        {
-            err = 1;
-            fprintf(stderr, "ftell() failure on plaintext file\n");
-            goto out;
-        }
+    if((fsize = ftell(plaintextFile)) == -1L)
+    {
+        err = 1;
+        fprintf(stderr, "ftell() failure on plaintext file\n");
+        goto out;
+    }
 
-        plaintext_len = fsize;
-        ciphertext_len = plaintext_len + (blklen - (plaintext_len % blklen));
-        fprintf(stdout, "ciphertext/plaintext len: %d\n", ciphertext_len);
+    plaintext_len = fsize-1;
+    ciphertext_len = (plaintext_len % blklen == 0) ? plaintext_len + blklen :
+                     plaintext_len + (blklen - (plaintext_len % blklen));
+    fprintf(stdout, "ciphertext: %d\n", ciphertext_len);
 
-        if(fseek(plaintextFile, 0, SEEK_SET))
-        {
-            err = 1;
-            fprintf(stderr, "fseek() failure on plaintext file\n");
-            goto out;
-        }
+    if(fseek(plaintextFile, 0, SEEK_SET))
+    {
+        err = 1;
+        fprintf(stderr, "fseek() failure on plaintext file\n");
+        goto out;
+    }
 
-        fileContent = (unsigned char *) gcry_malloc(sizeof(unsigned char)*ciphertext_len);
+    fileContent = (unsigned char *) gcry_malloc_secure(sizeof(unsigned char)*ciphertext_len);
+    if(fileContent == NULL)
+    {
+        err = 1;
+        fprintf(stderr, "Could not allocate memory!\n");
+        goto out;
+    }
 
-        if(fileContent == NULL)
-        {
-            err = 1;
-            fprintf(stderr, "Could not allocate memory!\n");
-            goto out;
-        }
+    if(fread(fileContent, 1, plaintext_len, plaintextFile) != plaintext_len)
+    {
+        err = 1;
+        fprintf(stderr, "fread() failure on plaintext file\n");
+        goto out;
+    }
 
-        if(fread(fileContent, 1, plaintext_len, plaintextFile) != plaintext_len)
-        {
-            err = 1;
-            fprintf(stderr, "fread() failure on plaintext file\n");
-            goto out;
-        }
+    fileContent[plaintext_len] = 0x10;
 
-        fprintf(stdout, "%s\n", fileContent);
+    fprintf(stdout, "FileContent: ");
+    print.printBuff(fileContent, ciphertext_len);
 
-        err = gcry_cipher_open(&hd, GCRY_CIPHER_AES, GCRY_CIPHER_MODE_CBC, 0);
-        if(err)
-        {
-            err = 1;
-            fprintf(stderr, "gcry_cipher_open() error\n");
-            goto out;
-        }
+    err = gcry_cipher_open(&hd, GCRY_CIPHER_AES, GCRY_CIPHER_MODE_CBC, 0);
+    if(err)
+    {
+        err = 1;
+        fprintf(stderr, "gcry_cipher_open() error\n");
+        goto out;
+    }
 
-        if((keyFile = fopen(keyPath, "r")) == NULL)
-        {
-            err = 1;
-            fprintf(stderr, "fopen() failure on key file\n");
-            goto out;
-        }
+    if((keyFile = fopen(keyPath, "r")) == NULL)
+    {
+        err = 1;
+        fprintf(stderr, "fopen() failure on key file\n");
+        goto out;
+    }
 
-        if(0 == fscanf(keyFile, "%s", key))
-        {
-            err = 1;
-            fprintf(stderr, "fscanf() failure on key file\n");
-            fprintf(stderr, "%s\n", key);
-            goto out;
-        }
+    key = (unsigned char *) gcry_malloc_secure(sizeof(unsigned char)*blklen);
+    if(fread(key, 1, blklen, keyFile) != blklen)
+    {
+        err = 1;
+        fprintf(stderr, "fscanf() failure on key file\n");
+        goto out;
+    }
 
-        fprintf(stdout, "key: %s\n", key);
+    fprintf(stdout, "key: ");
+    print.printBuff(key, blklen);
 
-        err = gcry_cipher_setkey(hd, key, blklen);
-        if(err)
-        {
-            err = 1;
-            fprintf(stderr, "gcry_cipher_setkey() error\n");
-            goto out;
-        }
+    err = gcry_cipher_setkey(hd, key, blklen);
+    if(err)
+    {
+        err = 1;
+        fprintf(stderr, "gcry_cipher_setkey() error\n");
+        goto out;
+    }
 
-        iv = (const char *) gcry_malloc(sizeof(unsigned char)*blklen);
-        memcpy((void *)iv, "00000000000000000", blklen);
+    //iv = (const char *) gcry_malloc(sizeof(unsigned char)*blklen);
+    //memcpy((void *)iv, "00000000000000000", blklen);
 
-        fprintf(stdout, "iv: %s\n", iv);
+    //fprintf(stdout, "iv: %s\n", iv);
 
-        err = gcry_cipher_setiv(hd, iv, blklen);
+    err = gcry_cipher_setiv(hd, iv, blklen);
 
-        if(err)
-        {
-            err = 1;
-            fprintf(stderr, "gcry_cipher_setkey() error\n");
-            goto out;
-        }
+    if(err)
+     {
+        err = 1;
+        fprintf(stderr, "gcry_cipher_setkey() error\n");
+        goto out;
+    }
 
-        ciphertext_len = plaintext_len + (blklen - (plaintext_len % blklen));
+    ciphertext_len = plaintext_len + (blklen - (plaintext_len % blklen));
+    //ciphertext = (unsigned char *) gcry_malloc(sizeof(unsigned char)*ciphertext_len);
 
-        ciphertext = (unsigned char *) gcry_malloc(sizeof(unsigned char)*ciphertext_len);
+    fprintf(stdout, "plainlen: %d\n", plaintext_len);
 
-        fprintf(stdout, "plain: %d\n", sizeof(fileContent));
-        fprintf(stdout, "%d\n", ciphertext_len);
+    //fprintf(stdout, "%d\n", ciphertext_len);
 
-        err = gcry_cipher_encrypt(hd, ciphertext, ciphertext_len, fileContent, ciphertext_len);
+    err = gcry_cipher_encrypt(hd, fileContent, ciphertext_len, NULL, 0);
 
-        fprintf(stdout, "cipher: %s\n", ciphertext);
+    fprintf(stdout, "FileCOntent: ");
+    print.printBuff(fileContent, ciphertext_len);
 
-        err = gcry_cipher_decrypt(hd, tmp, plaintext_len, ciphertext, ciphertext_len);
+    //fprintf(stdout, "cipher: %s\n", ciphertext);
 
-        fprintf(stdout, "%s\n", tmp);
+    //err = gcry_cipher_decrypt(hd, ciphertext, ciphertext_len, NULL, 0);
 
-        if(err)
-        {
-            err = 1;
-            fprintf (stderr, "Failure: %s/%s\n",
-                                gcry_strsource (err),
-                                gcry_strerror (err));
-            goto out;
-        }
+    if(err)
+    {
+        err = 1;
+        fprintf (stderr, "Failure: %s/%s\n",
+                            gcry_strsource (err),
+                            gcry_strerror (err));
+        goto out;
+    }
 
-        sprintf(pathCipherFile, "../ressources/%s.cipher", cipherPath);
+    sprintf(pathCipherFile, "../ressources/%s.cipher", cipherPath);
 
-        if((ciphertextFile = fopen(pathCipherFile, "w")) == NULL)
-        {
-            err = 1;
-            fprintf(stderr, "fopen() error on ciphertext file\n");
-            goto out;
-        }
+    if((ciphertextFile = fopen(pathCipherFile, "w")) == NULL)
+    {
+        err = 1;
+        fprintf(stderr, "fopen() error on ciphertext file\n");
+        goto out;
+    }
 
-        fprintf(ciphertextFile, "%s", ciphertext);
+    printf("%s\n", pathCipherFile);
 
-        //memcpy((void *) fileContent, "00000", 5);
+    if(!fwrite)
+    {
+        err = 1;
+        fprintf(stderr, "Could not write into cipher file\n");
+        goto out;
+    }
 
-        //fprintf(stdout, "%s\n", fileContent);
+    //fprintf(ciphertextFile, "%s", ciphertext);
 
-        //err = gcry_cipher_decrypt(hd, fileContent, ciphertext_len, ciphertext, ciphertext_len);
+    //memcpy((void *) fileContent, "00000", 5);
 
-        //fprintf(stdout, "%s\n", fileContent);
+    //fprintf(stdout, "%s\n", fileContent);
+
+    //err = gcry_cipher_decrypt(hd, fileContent, ciphertext_len, ciphertext, ciphertext_len);
+
+    //fprintf(stdout, "%s\n", fileContent);
 
     out:
         if(hd)
@@ -222,7 +238,10 @@ int AES::aes_cbc_128(const char *plaintextPath, const char *keyPath,
             fclose(ciphertextFile);
         if(keyFile)
             fclose(keyFile);
-
+        if(fileContent)
+            gcry_free(fileContent);
+        if(key)
+            gcry_free(key);
         return err;
 }
 

@@ -25,7 +25,7 @@ class Cipher : public QDialog
 
 public:
     Cipher();
-    Cipher(int);
+    Cipher(int, int);
 
 private:
     int rep;

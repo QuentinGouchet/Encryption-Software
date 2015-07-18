@@ -50,7 +50,7 @@ public slots:
 signals:
     void hashSelected(int);
     void generateKeySelected(int);
-    void cipherSelected(int);   
+    void cipherSelected(int,int);
     void decipherSelected(int);
     void signSelected(int);
     void verifSelected(int);

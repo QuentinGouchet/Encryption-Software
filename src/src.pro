@@ -36,7 +36,3 @@ HEADERS += \
 LIBS += -lgmp -lgcrypt -lcrypto -Wall
 
 QT += widgets
-
-DISTFILES +=
-
-CONFIG += console

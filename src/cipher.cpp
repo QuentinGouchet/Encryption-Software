@@ -10,7 +10,7 @@ Cipher::Cipher(): QDialog() {}
     4 - "AES-CBC-128"
 */
 
-Cipher::Cipher(int index): QDialog()
+Cipher::Cipher(int index, int public_cipher): QDialog()
 {
     setFixedSize(800, 400);
     this->setWindowTitle("Cipher");
@@ -46,7 +46,13 @@ Cipher::Cipher(int index): QDialog()
     fdPlain->setDirectory("../ressources/");
     fdKey->setDirectory("../ressources/");
 
-    QStringList listFilters(QStringList() << "*.puKey" << "*.key" << "*");
+    QStringList listFilters;
+
+    if(public_cipher)
+        listFilters << "*.puKey" << "*";
+    else
+        listFilters << "*.key" << "*";
+
     fdKey->setNameFilters(listFilters);
 
     gl = new QGridLayout(this);
@@ -375,7 +381,7 @@ void Cipher::computeAES(){
         }
         else*/ if(!reKey->exactMatch(leKey->text())){
           mb = new QMessageBox(this);
-          mb->setText("The given public key is wrong.");
+          mb->setText("The given key is wrong.");
           mb->setWindowTitle("Information");
           mb->exec();
           this->close();

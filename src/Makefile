@@ -33,7 +33,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = src1.0.0
-DISTDIR = /home/quentin/Documents/project_calculette_crypto/src/.tmp/src1.0.0
+DISTDIR = /home/quentin/Documents/EncryptionSoftware/trunk/src/.tmp/src1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-O1 -Wl,-z,relro
 LIBS          = $(SUBLIBS) -lgmp -lgcrypt -lcrypto -Wall -lQt5Widgets -lQt5Gui -lQt5Core -lGL -lpthread 
@@ -547,7 +547,7 @@ moc_sign.cpp: rsa.h \
 		elgamal.h \
 		dsa.h \
 		sign.h
-	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/project_calculette_crypto/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include sign.h -o moc_sign.cpp
+	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/EncryptionSoftware/trunk/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include sign.h -o moc_sign.cpp
 
 moc_mainwindow.cpp: decipher.h \
 		rabin.h \
@@ -555,31 +555,33 @@ moc_mainwindow.cpp: decipher.h \
 		elgamal.h \
 		rsa.h \
 		cipher.h \
+		aes.h \
+		error.h \
 		sign.h \
 		dsa.h \
 		generatekey.h \
-		aes.h \
-		error.h \
 		hash.h \
 		sha.h \
 		verify.h \
 		cipheraes.h \
 		mainwindow.h
-	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/project_calculette_crypto/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include mainwindow.h -o moc_mainwindow.cpp
+	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/EncryptionSoftware/trunk/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include mainwindow.h -o moc_mainwindow.cpp
 
 moc_cipher.cpp: rabin.h \
 		util.h \
 		rsa.h \
 		elgamal.h \
+		aes.h \
+		error.h \
 		cipher.h
-	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/project_calculette_crypto/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include cipher.h -o moc_cipher.cpp
+	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/EncryptionSoftware/trunk/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include cipher.h -o moc_cipher.cpp
 
 moc_decipher.cpp: rabin.h \
 		util.h \
 		elgamal.h \
 		rsa.h \
 		decipher.h
-	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/project_calculette_crypto/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include decipher.h -o moc_decipher.cpp
+	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/EncryptionSoftware/trunk/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include decipher.h -o moc_decipher.cpp
 
 moc_generatekey.cpp: rsa.h \
 		util.h \
@@ -589,18 +591,18 @@ moc_generatekey.cpp: rsa.h \
 		aes.h \
 		error.h \
 		generatekey.h
-	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/project_calculette_crypto/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include generatekey.h -o moc_generatekey.cpp
+	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/EncryptionSoftware/trunk/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include generatekey.h -o moc_generatekey.cpp
 
 moc_hash.cpp: sha.h \
 		hash.h
-	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/project_calculette_crypto/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include hash.h -o moc_hash.cpp
+	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/EncryptionSoftware/trunk/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include hash.h -o moc_hash.cpp
 
 moc_verify.cpp: rsa.h \
 		util.h \
 		elgamal.h \
 		dsa.h \
 		verify.h
-	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/project_calculette_crypto/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include verify.h -o moc_verify.cpp
+	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/EncryptionSoftware/trunk/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include verify.h -o moc_verify.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -620,7 +622,9 @@ cipher.o: cipher.cpp cipher.h \
 		rabin.h \
 		util.h \
 		rsa.h \
-		elgamal.h
+		elgamal.h \
+		aes.h \
+		error.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cipher.o cipher.cpp
 
 sign.o: sign.cpp sign.h \
@@ -641,11 +645,11 @@ mainwindow.o: mainwindow.cpp mainwindow.h \
 		elgamal.h \
 		rsa.h \
 		cipher.h \
+		aes.h \
+		error.h \
 		sign.h \
 		dsa.h \
 		generatekey.h \
-		aes.h \
-		error.h \
 		hash.h \
 		sha.h \
 		verify.h \
@@ -659,11 +663,11 @@ main.o: main.cpp mainwindow.h \
 		elgamal.h \
 		rsa.h \
 		cipher.h \
+		aes.h \
+		error.h \
 		sign.h \
 		dsa.h \
 		generatekey.h \
-		aes.h \
-		error.h \
 		hash.h \
 		sha.h \
 		verify.h \

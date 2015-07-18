@@ -2,11 +2,29 @@
 
 MainWindow::MainWindow() : QWidget()
 {
-    int err = 0;
+    gcry_error_t err = 0;
 
-    //gcry_control(GCRYCTL_FORCE_FIPS_MODE, 0);
+    if(!gcry_check_version(GCRYPT_VERSION))
+    {
+        err = 1;
+        fprintf(stderr, "Version mismatch\n");
+        this->fail();
+    }
 
-    gcry_check_version("1.4.3");
+    if(!(err = gcry_control(GCRYCTL_INIT_SECMEM, 16384, 0)))
+    {
+        fprintf (stderr, "Failed to enable secure memory: %s/%s\n",
+                            gcry_strsource (err),
+                            gcry_strerror (err));
+        this->fail();
+    }
+
+    if(!gcry_control(GCRYCTL_FORCE_FIPS_MODE, 0))
+    {
+        err = 1;
+        fprintf(stderr, "Failed to put in FIPS mode\n");
+        this->fail();
+    }
 
     /*if(gcry_control(GCRYCTL_SELFTEST))
     {
@@ -18,6 +36,7 @@ MainWindow::MainWindow() : QWidget()
     if(gcry_control(GCRYCTL_OPERATIONAL_P))
     {
         err = 1;
+        fprintf(stderr, "Initialization failed\n");
         this->fail();
     }
 
@@ -66,9 +85,9 @@ MainWindow::MainWindow() : QWidget()
     comboVerify = new QComboBox(this);
 
     qtFichier1 = new QTextEdit(this);
-    qtFichier1->setReadOnly(true);
+    qtFichier1->setReadOnly(false);
     qtFichier2 = new QTextEdit(this);
-    qtFichier2->setReadOnly(true);
+    qtFichier2->setReadOnly(false);
 
     comboHash->addItems(listHash);
     comboGenerateKey->addItems(listGenerateKey);
@@ -180,8 +199,13 @@ void MainWindow::openGenerateKey()
 
 void MainWindow::openCipher()
 {
-    cipher = new Cipher(this->getCipherSelected());
-    emit cipherSelected(this->getCipherSelected());
+    QString alg = comboCipher->currentText();
+    int public_cipher = 1;
+    if(alg.compare("AES") == 0 || alg.compare("TDES") == 0)
+        public_cipher = 0;
+
+    cipher = new Cipher(this->getCipherSelected(), public_cipher);
+    emit cipherSelected(this->getCipherSelected(), public_cipher);
     cipher->exec();
 }
 

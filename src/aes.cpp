@@ -53,7 +53,6 @@ int AES::aes_cbc_128(const char *plaintextPath, const char *keyPath,
 {
     FILE *plaintextFile = NULL;
     FILE *ciphertextFile = NULL;
-    FILE *keyFile = NULL;
 
     int blklen = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES);
 
@@ -136,7 +135,8 @@ int AES::aes_cbc_128(const char *plaintextPath, const char *keyPath,
         goto out;
     }
 
-    if((keyFile = fopen(keyPath, "r")) == NULL)
+    /* No keyfile needed
+     * if((keyFile = fopen(keyPath, "r")) == NULL)
     {
         err = 1;
         fprintf(stderr, "fopen() failure on key file\n");
@@ -153,6 +153,7 @@ int AES::aes_cbc_128(const char *plaintextPath, const char *keyPath,
 
     fprintf(stdout, "key: ");
     print.printBuff(key, blklen);
+    */
 
     err = gcry_cipher_setkey(hd, key, blklen);
     if(err)
@@ -236,8 +237,6 @@ int AES::aes_cbc_128(const char *plaintextPath, const char *keyPath,
             fclose(plaintextFile);
         if(ciphertextFile)
             fclose(ciphertextFile);
-        if(keyFile)
-            fclose(keyFile);
         if(fileContent)
             gcry_free(fileContent);
         if(key)

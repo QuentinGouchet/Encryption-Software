@@ -18,6 +18,7 @@
 #include "rsa.h"
 #include "elgamal.h"
 #include "aes.h"
+#include "util.h"
 
 class Cipher : public QDialog
 {
@@ -64,7 +65,9 @@ private:
     RSA2 *rsa;
     ElGamal *elGamal;
     Rabin *rabin;
-    AES *aes;
+    AES *aes;    
+
+    int derivePassphrase(unsigned char *, int);
 
 public slots:
     void computeRSA();

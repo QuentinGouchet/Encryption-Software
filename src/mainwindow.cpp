@@ -42,6 +42,8 @@ MainWindow::MainWindow() : QWidget()
                                     gcry_strerror (err));
         this->fail();
     }
+    else
+        fprintf(stdout, "Initialization passed\n");
 
     /*if(err = gcry_control(GCRYCTL_OPERATIONAL_P))
     {
@@ -196,7 +198,15 @@ MainWindow::MainWindow() : QWidget()
 
 void MainWindow::terminate()
 {
-    gcry_control(GCRYCTL_TERM_SECMEM);
+    gcry_error_t err = 0;
+    if(err = gcry_control(GCRYCTL_TERM_SECMEM))
+    {
+        fprintf(stderr, "Initialization failed: %s/%s\n",
+                                    gcry_strsource (err),
+                                    gcry_strerror (err));
+        this->fail();
+    }
+
     close();
 }
 

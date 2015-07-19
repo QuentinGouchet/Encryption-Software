@@ -10,6 +10,40 @@ Cipher::Cipher(): QDialog() {}
     4 - "AES-CBC-128"
 */
 
+int Cipher::derivePassphrase(unsigned char *key, int keylen)
+{
+    gcry_error_t err = 0;
+    gcry_md_hd_t hd = NULL;
+    unsigned char *digest = NULL;
+    int hash_len;
+
+    if(err = gcry_md_open(&hd, GCRY_MD_SHA256, GCRY_MD_FLAG_SECURE))
+    {
+            fprintf (stderr, "Failure to open MD_SHA256: %s/%s\n",
+                                gcry_strsource (err),
+                                gcry_strerror (err));
+            return 1;
+    }
+
+    hash_len = gcry_md_get_algo_dlen(GCRY_MD_SHA256);
+
+    gcry_md_write(hd, key, keylen);
+    digest = gcry_md_read(hd, GCRY_MD_SHA256);
+
+    fprintf(stdout, "digest of key: ");
+    Util print;
+    print.printBuff(digest, hash_len);
+
+    if(hd)
+            gcry_md_close(hd);
+    if(digest)
+            gcry_free(digest);
+    if(key)
+            gcry_free(key);
+
+    return 0;
+}
+
 Cipher::Cipher(int index, int public_cipher): QDialog()
 {
     setFixedSize(800, 400);
@@ -102,18 +136,22 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
         case 0:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeRSA()));
             comboMode->setEnabled(false);
+            leIv->setEnabled(false);
             break;
         case 1:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeElGamal()));
             comboMode->setEnabled(false);
+            leIv->setEnabled(false);
             break;
         case 2:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeRabin()));
             comboMode->setEnabled(false);
+            leIv->setEnabled(false);
             break;
         case 3:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeRSAOAEP()));
             comboMode->setEnabled(false);
+            leIv->setEnabled(false);
             break;
         case 4:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeAES()));
@@ -353,21 +391,29 @@ void Cipher::computeAES(){
     // reKey = new QRegExp("^[\\w|/]+\\.(key)$");
 
     // Let's derive the key given by the password
-    fprintf(stdout, "%s\n", leKey->text().toLocal8Bit().constData());
+    fprintf(stdout, "passphrase: %s\n", leKey->text().toLocal8Bit().constData());
+    fprintf(stdout, "size in bytes: %d\n", comboSize->currentText().toInt()/8);
+
+    int keylen = comboSize->currentText().toLocal8Bit().toInt()/8;
+
+    unsigned char *key = (unsigned char *) gcry_malloc_secure(sizeof(unsigned char)*keylen);
+
+    Cipher derive;
+    derive.derivePassphrase(key, keylen);
 
     /*
         Dans un soucis de contrôle minimaliste des entrées, nous vérifions, avant toutes opérations, que les
         QLineEdit contienne bien une extension .in pour le fichier d'entrée, une extension .out pour le fi-
         chier de sortie et une extension .key pour le fichier de clé
     */
-    if(reCipher->exactMatch(leCipher->text()) && reKey->exactMatch(leKey->text())){
+    if(reCipher->exactMatch(leCipher->text())){
         aes = new AES();
 
         if(!(strcmp(comboMode->currentText().toLocal8Bit().constData(), "CBC") ||
                 strcmp(comboSize->currentText().toLocal8Bit().constData(), "128")))
         {
             rep = aes->aes_cbc_128(lePlain->text().toLocal8Bit().constData(),
-                               leKey->text().toLocal8Bit().constData(),
+                               (const char *) key,
                                leCipher->text().toLocal8Bit().constData(),
                                leIv->text().toLocal8Bit().constData());
         }
@@ -409,4 +455,7 @@ void Cipher::computeAES(){
           this->close();
         }
     }
+    // not actually needed, it is done by derivePassphrase
+    if(key)
+        gcry_free(key);
 }

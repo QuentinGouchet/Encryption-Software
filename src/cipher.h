@@ -67,7 +67,7 @@ private:
     Rabin *rabin;
     AES *aes;    
 
-    int derivePassphrase(unsigned char *, int);
+    unsigned char *derivePassphrase(unsigned char *, int);
 
 public slots:
     void computeRSA();

@@ -48,7 +48,7 @@ int AES::generateKey(unsigned int nbits, const char *root_keys)
     return err;
 }
 
-int AES::aes_cbc_128(const char *plaintextPath, const char *keyPath,
+int AES::aes_cbc_128(const char *plaintextPath, const char *key,
                      const char *cipherPath, const char *iv)
 {
     FILE *plaintextFile = NULL;
@@ -60,8 +60,6 @@ int AES::aes_cbc_128(const char *plaintextPath, const char *keyPath,
     unsigned char *ciphertext = NULL;
 
     char pathCipherFile[50];
-    char pathKeyFile[50];
-    unsigned char *key;
 
     long fsize = 0;
     int plaintext_len, ciphertext_len, i;
@@ -135,26 +133,6 @@ int AES::aes_cbc_128(const char *plaintextPath, const char *keyPath,
         goto out;
     }
 
-    /* No keyfile needed
-     * if((keyFile = fopen(keyPath, "r")) == NULL)
-    {
-        err = 1;
-        fprintf(stderr, "fopen() failure on key file\n");
-        goto out;
-    }
-
-    key = (unsigned char *) gcry_malloc_secure(sizeof(unsigned char)*blklen);
-    if(fread(key, 1, blklen, keyFile) != blklen)
-    {
-        err = 1;
-        fprintf(stderr, "fscanf() failure on key file\n");
-        goto out;
-    }
-
-    fprintf(stdout, "key: ");
-    print.printBuff(key, blklen);
-    */
-
     err = gcry_cipher_setkey(hd, key, blklen);
     if(err)
     {
@@ -162,11 +140,6 @@ int AES::aes_cbc_128(const char *plaintextPath, const char *keyPath,
         fprintf(stderr, "gcry_cipher_setkey() error\n");
         goto out;
     }
-
-    //iv = (const char *) gcry_malloc(sizeof(unsigned char)*blklen);
-    //memcpy((void *)iv, "00000000000000000", blklen);
-
-    //fprintf(stdout, "iv: %s\n", iv);
 
     err = gcry_cipher_setiv(hd, iv, blklen);
 
@@ -178,20 +151,13 @@ int AES::aes_cbc_128(const char *plaintextPath, const char *keyPath,
     }
 
     ciphertext_len = plaintext_len + (blklen - (plaintext_len % blklen));
-    //ciphertext = (unsigned char *) gcry_malloc(sizeof(unsigned char)*ciphertext_len);
 
     fprintf(stdout, "plainlen: %d\n", plaintext_len);
 
-    //fprintf(stdout, "%d\n", ciphertext_len);
-
     err = gcry_cipher_encrypt(hd, fileContent, ciphertext_len, NULL, 0);
 
-    fprintf(stdout, "FileCOntent: ");
+    fprintf(stdout, "FileContent: ");
     print.printBuff(fileContent, ciphertext_len);
-
-    //fprintf(stdout, "cipher: %s\n", ciphertext);
-
-    //err = gcry_cipher_decrypt(hd, ciphertext, ciphertext_len, NULL, 0);
 
     if(err)
     {
@@ -230,6 +196,9 @@ int AES::aes_cbc_128(const char *plaintextPath, const char *keyPath,
 
     //fprintf(stdout, "%s\n", fileContent);
 
+    if(!err)
+        fprintf(stdout, "Success\n");
+
     out:
         if(hd)
             gcry_cipher_close(hd);
@@ -240,7 +209,7 @@ int AES::aes_cbc_128(const char *plaintextPath, const char *keyPath,
         if(fileContent)
             gcry_free(fileContent);
         if(key)
-            gcry_free(key);
+            gcry_free((void *)key);
         return err;
 }
 

@@ -11,14 +11,6 @@ MainWindow::MainWindow() : QWidget()
         this->fail();
     }
 
-    if(!(err = gcry_control(GCRYCTL_INIT_SECMEM, 16384, 0)))
-    {
-        fprintf (stderr, "Failed to enable secure memory: %s/%s\n",
-                            gcry_strsource (err),
-                            gcry_strerror (err));
-        this->fail();
-    }
-
     if(!gcry_control(GCRYCTL_FORCE_FIPS_MODE, 0))
     {
         err = 1;
@@ -26,21 +18,38 @@ MainWindow::MainWindow() : QWidget()
         this->fail();
     }
 
-    /*if(gcry_control(GCRYCTL_SELFTEST))
+    // No need for sec- mem: FIPS mode should use it already
+    /*if(err = gcry_control(GCRYCTL_INIT_SECMEM, 16384, 0))
     {
-        err = 1;
-        fprintf(stderr, "Selftests failed: error state\n");
+        fprintf (stderr, "Failed to enable secure memory: %s/%s\n",
+                            gcry_strsource (err),
+                            gcry_strerror (err));
         this->fail();
     }*/
 
-    if(gcry_control(GCRYCTL_OPERATIONAL_P))
+    if(err = gcry_control(GCRYCTL_SELFTEST))
     {
-        err = 1;
-        fprintf(stderr, "Initialization failed\n");
+        fprintf (stderr, "Failed selftests: %s/%s\n",
+                            gcry_strsource (err),
+                            gcry_strerror (err));
         this->fail();
     }
 
-    gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
+    if(err = gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0))
+    {
+        fprintf(stderr, "Initialization failed: %s/%s\n",
+                                    gcry_strsource (err),
+                                    gcry_strerror (err));
+        this->fail();
+    }
+
+    /*if(err = gcry_control(GCRYCTL_OPERATIONAL_P))
+    {
+        fprintf(stderr, "Initialization failed: %s/%s\n",
+                                    gcry_strsource (err),
+                                    gcry_strerror (err));
+        this->fail();
+    }*/
 
     setFixedSize(1200, 600);
     this->setWindowTitle("Cryptographic Calculator");
@@ -175,6 +184,14 @@ MainWindow::MainWindow() : QWidget()
     QObject::connect(fdFile2, SIGNAL(fileSelected(QString)), this, SLOT(viewFile2(QString)));
 
     this->setLayout(glMain);
+
+    if(err = gcry_control(GCRYCTL_TERM_SECMEM))
+    {
+        fprintf(stderr, "Initialization failed: %s/%s\n",
+                                    gcry_strsource (err),
+                                    gcry_strerror (err));
+        this->fail();
+    }
 }
 
 void MainWindow::terminate()

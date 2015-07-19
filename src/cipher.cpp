@@ -22,7 +22,8 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
     labelIv = new QLabel("Enter IV :", this);
 
     buttonBrowsePlain = new QPushButton("Browse", this);
-    buttonBrowseKey = new QPushButton("Browse", this);
+    if(public_cipher)
+        buttonBrowseKey = new QPushButton("Browse", this);
     buttonCancel = new QPushButton("Cancel", this);
     buttonCompute = new QPushButton("Compute", this);
 
@@ -37,7 +38,13 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
 
     lePlain = new QLineEdit(this);
     leCipher = new QLineEdit(this);
+
     leKey = new QLineEdit(this);
+
+    // EchoMode(1) sets a password type of echo
+    if(!public_cipher)
+        leKey->setEchoMode(QLineEdit::Password);
+
     leIv = new QLineEdit(this);
 
     fdPlain = new QFileDialog(this);
@@ -63,7 +70,9 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
 
     gl->addWidget(labelKey, 1, 0);
     gl->addWidget(leKey, 1, 1);
-    gl->addWidget(buttonBrowseKey, 1, 2);
+
+    if(public_cipher)
+        gl->addWidget(buttonBrowseKey, 1, 2);
 
     gl->addWidget(labelMode, 2, 0);
     gl->addWidget(comboMode, 2, 1);
@@ -82,7 +91,9 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
 
     QObject::connect(buttonCancel,SIGNAL(clicked()),this,SLOT(close()));
     QObject::connect(buttonBrowsePlain, SIGNAL(clicked()), fdPlain, SLOT(exec()));
-    QObject::connect(buttonBrowseKey, SIGNAL(clicked()), fdKey, SLOT(exec()));
+
+    if(public_cipher)
+        QObject::connect(buttonBrowseKey, SIGNAL(clicked()), fdKey, SLOT(exec()));
 
     QObject::connect(fdPlain, SIGNAL(fileSelected(QString)), lePlain, SLOT(setText(QString)));
     QObject::connect(fdKey, SIGNAL(fileSelected(QString)), leKey, SLOT(setText(QString)));
@@ -338,7 +349,11 @@ void Cipher::computeRSAOAEP(){
 void Cipher::computeAES(){
     //rePlain = new QRegExp("^[\\w|/]+\\.(plain)$");
     reCipher = new QRegExp("([\\w]+)");
-    reKey = new QRegExp("^[\\w|/]+\\.(key)$");
+    // Next line is not needed since we derive the key from the passphrase
+    // reKey = new QRegExp("^[\\w|/]+\\.(key)$");
+
+    // Let's derive the key given by the password
+    fprintf(stdout, "%s\n", leKey->text().toLocal8Bit().constData());
 
     /*
         Dans un soucis de contrôle minimaliste des entrées, nous vérifions, avant toutes opérations, que les

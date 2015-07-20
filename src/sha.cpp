@@ -51,7 +51,7 @@ int Sha::computeSha1(const char *plaintextPath, const char *fileNameHash)
             goto out;
         }
 
-        data = (char *) gcry_malloc(fsize + 1);
+        data = (char *) gcry_malloc_secure(fsize);
         if(data == NULL)
         {
             err = 1;
@@ -90,7 +90,7 @@ int Sha::computeSha1(const char *plaintextPath, const char *fileNameHash)
             for(i=0; i<hash_len; i++)
                 fprintf(hashFile, "%02x", digest[i]);
             fprintf(hashFile, "\n");
-       }
+        }
 
     out:
         if(plaintext)
@@ -151,7 +151,7 @@ int Sha::computeSha224(const char *plaintextPath, const char *fileNameHash)
             goto out;
         }
 
-        data = (char *) gcry_malloc(fsize + 1);
+        data = (char *) gcry_malloc_secure(fsize);
         if(data == NULL)
         {
             err = 1;
@@ -251,7 +251,7 @@ int Sha::computeSha256(const char * plaintextPath, const char * fileNameHash)
             goto out;
         }
 
-        data = (char *) gcry_malloc(fsize + 1);
+        data = (char *) gcry_malloc_secure(fsize);
         if(data == NULL)
         {
             err = 1;
@@ -351,7 +351,7 @@ int Sha::computeSha384(const char * plaintextPath, const char * fileNameHash)
             goto out;
         }
 
-        data = (char *) gcry_malloc(fsize + 1);
+        data = (char *) gcry_malloc_secure(fsize);
         if(data == NULL)
         {
             err = 1;
@@ -451,7 +451,7 @@ int Sha::computeSha512(const char * plaintextPath, const char * fileNameHash)
             goto out;
         }
 
-        data = (char *) gcry_malloc(fsize + 1);
+        data = (char *) gcry_malloc_secure(fsize);
         if(data == NULL)
         {
             err = 1;

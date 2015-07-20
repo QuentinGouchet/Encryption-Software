@@ -59,7 +59,7 @@ MainWindow::MainWindow() : QWidget()
     QStringList listHash(QStringList() << "SHA1" << "SHA224" << "SHA-256" << "SHA384" << "SHA-512");
     QStringList listGenerateKey(QStringList() << "RSA" << "EL GAMAL" << "RABIN" << "DSA" << "AES/TDES");
     QStringList listCipher(QStringList() << "RSA" << "EL GAMAL" << "RABIN" << "RSA-OAEP" << "AES");
-    QStringList listDecipher(QStringList() << "RSA" << "RSA-CRT" << "EL GAMAL" << "RABIN" << "RSA-OAEP");
+    QStringList listDecipher(QStringList() << "RSA" << "RSA-CRT" << "EL GAMAL" << "RABIN" << "RSA-OAEP" << "AES");
     QStringList listSign(QStringList() << "RSA" << "EL GAMAL" << "DSA");
     QStringList listVerify(QStringList() << "RSA" << "EL GAMAL" << "DSA");
     QStringList listFilter(QStringList() << "*.puKey" << "*.prKey" << "*.plain" << "*.cipher" << "*");
@@ -238,8 +238,14 @@ void MainWindow::openCipher()
 
 void MainWindow::openDecipher()
 {
-    decipher = new Decipher(this->getDecipherSelected());
-    emit decipherSelected(this->getDecipherSelected());
+    QString alg = comboDecipher->currentText();
+
+    int public_cipher = 1;
+    if(alg.compare("AES") == 0 || alg.compare("TDES") == 0)
+        public_cipher = 0;
+
+    decipher = new Decipher(this->getDecipherSelected(), public_cipher);
+    emit decipherSelected(this->getDecipherSelected(), public_cipher);
     decipher->exec();
 }
 

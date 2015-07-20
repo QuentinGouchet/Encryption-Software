@@ -10,37 +10,6 @@ Cipher::Cipher(): QDialog() {}
     4 - "AES-CBC-128"
 */
 
-unsigned char * Cipher::derivePassphrase(unsigned char *pass, int length)
-{
-    gcry_error_t err = 0;
-    gcry_md_hd_t hd = NULL;
-    int hash_len;
-
-    if(err = gcry_md_open(&hd, GCRY_MD_SHA256, GCRY_MD_FLAG_SECURE))
-    {
-            fprintf (stderr, "Failure to open MD_SHA256: %s/%s\n",
-                                gcry_strsource (err),
-                                gcry_strerror (err));
-            return NULL;
-    }
-
-    if(hash_len = gcry_md_get_algo_dlen(GCRY_MD_SHA256))
-        return NULL;
-
-    gcry_md_write(hd, pass, length);
-
-    pass = gcry_md_read(hd, GCRY_MD_SHA256);
-
-    fprintf(stdout, "Digest of key: ");
-    Util print;
-    print.printBuff(pass, hash_len);
-
-    if(hd)
-            gcry_md_close(hd);
-
-    return pass;
-}
-
 Cipher::Cipher(int index, int public_cipher): QDialog()
 {
     setFixedSize(800, 400);
@@ -49,7 +18,7 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
     labelPlain = new QLabel("Choose file to cipher :",this);
     labelCipher = new QLabel("Name the output file :",this);
     labelKey = new QLabel("Choose which key to use :",this);
-    labelMode = new QLabel("Block chaining mode :");
+    labelMode = new QLabel("Block chaining mode and size :");
     labelIv = new QLabel("Enter IV :", this);
 
     buttonBrowsePlain = new QPushButton("Browse", this);
@@ -58,7 +27,7 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
     buttonCancel = new QPushButton("Cancel", this);
     buttonCompute = new QPushButton("Compute", this);
 
-    QStringList listMode(QStringList() << "ECB" << "CBC");
+    QStringList listMode(QStringList() << "CBC");
     QStringList listSize(QStringList() << "128" << "256");
 
     comboMode = new QComboBox(this);
@@ -69,7 +38,6 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
 
     lePlain = new QLineEdit(this);
     leCipher = new QLineEdit(this);
-
     leKey = new QLineEdit(this);
 
     // EchoMode(1) sets a password type of echo
@@ -397,17 +365,33 @@ void Cipher::computeAES(){
     fprintf(stdout, "size of pass: %d\n", pass_len);
 
     Util print;
-    printf("passphrase: %s\n", leKey->text().toLocal8Bit().constData());
 
     int hash_len = gcry_md_get_algo_dlen(GCRY_MD_SHA256);
 
     unsigned char *pass = (unsigned char *) gcry_malloc_secure(sizeof(unsigned char)*hash_len);
-    //strcpy( (char *) pass, leKey->text().toLocal8Bit().constData());
-
-    Cipher derive;
-    //derive.derivePassphrase(pass, pass_len);
+    strcpy( (char *) pass, leKey->text().toLocal8Bit().constData());
 
     fprintf(stdout, "pass: ");
+    print.printBuff(pass, hash_len);
+
+    gcry_error_t err = 0;
+    gcry_md_hd_t hd = NULL;
+
+    if(err = gcry_md_open(&hd, GCRY_MD_SHA256, GCRY_MD_FLAG_SECURE))
+    {
+            fprintf (stderr, "Failure to open MD_SHA256: %s/%s\n",
+                                gcry_strsource (err),
+                                gcry_strerror (err));
+            goto out;
+    }
+
+    gcry_md_write(hd, pass, pass_len);
+
+    pass = gcry_md_read(hd, GCRY_MD_SHA256);
+
+    printf("hash_len: %d\n", hash_len);
+
+    fprintf(stdout, "Digest of key: ");
     print.printBuff(pass, hash_len);
 
     /*
@@ -422,7 +406,7 @@ void Cipher::computeAES(){
         if(!(strcmp(comboMode->currentText().toLocal8Bit().constData(), "CBC") ||
                 strcmp(comboSize->currentText().toLocal8Bit().constData(), "128")))
         {
-            rep = aes->aes_cbc_128(lePlain->text().toLocal8Bit().constData(),
+            rep = aes->aes_cbc_128_encrypt(lePlain->text().toLocal8Bit().constData(),
                                (const char *) pass,
                                leCipher->text().toLocal8Bit().constData(),
                                leIv->text().toLocal8Bit().constData());
@@ -450,14 +434,14 @@ void Cipher::computeAES(){
           mb->exec();
           this->close();
         }
-        else*/ if(!reKey->exactMatch(leKey->text())){
+        else if(!reKey->exactMatch(leKey->text())){
           mb = new QMessageBox(this);
           mb->setText("The given key is wrong.");
           mb->setWindowTitle("Information");
           mb->exec();
           this->close();
-        }
-        else if(!reCipher->exactMatch(leCipher->text())){
+        }*/
+        if(!reCipher->exactMatch(leCipher->text())){
           mb = new QMessageBox(this);
           mb->setText("The given name doesn't respect the given format.");
           mb->setWindowTitle("Information");
@@ -466,6 +450,9 @@ void Cipher::computeAES(){
         }
     }
     // not actually needed, it is done by derivePassphrase
-    if(pass)
-        gcry_free(pass);
+    out:
+        if(pass)
+            gcry_free(pass);
+        if(hd)
+                gcry_md_close(hd);
 }

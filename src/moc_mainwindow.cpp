@@ -75,27 +75,27 @@ static const uint qt_meta_data_MainWindow[] = {
        1,    1,   94,    2, 0x06 /* Public */,
        3,    1,   97,    2, 0x06 /* Public */,
        4,    2,  100,    2, 0x06 /* Public */,
-       5,    1,  105,    2, 0x06 /* Public */,
-       6,    1,  108,    2, 0x06 /* Public */,
-       7,    1,  111,    2, 0x06 /* Public */,
+       5,    2,  105,    2, 0x06 /* Public */,
+       6,    1,  110,    2, 0x06 /* Public */,
+       7,    1,  113,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       8,    0,  114,    2, 0x0a /* Public */,
-       9,    0,  115,    2, 0x0a /* Public */,
-      10,    0,  116,    2, 0x0a /* Public */,
-      11,    0,  117,    2, 0x0a /* Public */,
-      12,    0,  118,    2, 0x0a /* Public */,
-      13,    0,  119,    2, 0x0a /* Public */,
-      14,    0,  120,    2, 0x0a /* Public */,
-      15,    0,  121,    2, 0x0a /* Public */,
-      16,    1,  122,    2, 0x0a /* Public */,
-      17,    1,  125,    2, 0x0a /* Public */,
+       8,    0,  116,    2, 0x0a /* Public */,
+       9,    0,  117,    2, 0x0a /* Public */,
+      10,    0,  118,    2, 0x0a /* Public */,
+      11,    0,  119,    2, 0x0a /* Public */,
+      12,    0,  120,    2, 0x0a /* Public */,
+      13,    0,  121,    2, 0x0a /* Public */,
+      14,    0,  122,    2, 0x0a /* Public */,
+      15,    0,  123,    2, 0x0a /* Public */,
+      16,    1,  124,    2, 0x0a /* Public */,
+      17,    1,  127,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::Int,    2,
     QMetaType::Void, QMetaType::Int,    2,
     QMetaType::Void, QMetaType::Int, QMetaType::Int,    2,    2,
-    QMetaType::Void, QMetaType::Int,    2,
+    QMetaType::Void, QMetaType::Int, QMetaType::Int,    2,    2,
     QMetaType::Void, QMetaType::Int,    2,
     QMetaType::Void, QMetaType::Int,    2,
 
@@ -122,7 +122,7 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 0: _t->hashSelected((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 1: _t->generateKeySelected((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 2: _t->cipherSelected((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 3: _t->decipherSelected((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 3: _t->decipherSelected((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         case 4: _t->signSelected((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 5: _t->verifSelected((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 6: _t->terminate(); break;
@@ -160,7 +160,7 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
             }
         }
         {
-            typedef void (MainWindow::*_t)(int );
+            typedef void (MainWindow::*_t)(int , int );
             if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::decipherSelected)) {
                 *result = 3;
             }
@@ -238,9 +238,9 @@ void MainWindow::cipherSelected(int _t1, int _t2)
 }
 
 // SIGNAL 3
-void MainWindow::decipherSelected(int _t1)
+void MainWindow::decipherSelected(int _t1, int _t2)
 {
-    void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 3, _a);
 }
 

@@ -12,10 +12,12 @@
 #include <QGridLayout>
 #include <QRegExp>
 #include <QMessageBox>
+#include <QComboBox>
 
 #include "rabin.h"
 #include "elgamal.h"
 #include "rsa.h"
+#include "aes.h"
 
 class Decipher : public QDialog
 {
@@ -23,25 +25,31 @@ class Decipher : public QDialog
 
 public:
     Decipher();
-    Decipher(int);
+    Decipher(int, int);
 
 private:
     unsigned int rep;
     QPushButton *buttonBrowseCipher;
-    QPushButton *buttonBrowsePrivateKey;
+    QPushButton *buttonBrowseKey;
     QPushButton *buttonCancel;
     QPushButton *buttonCompute;
 
+    QComboBox *comboMode;
+    QComboBox *comboSize;
+
     QLabel *labelPlain;
     QLabel *labelCipher;
-    QLabel *labelPrivateKey;
+    QLabel *labelKey;
+    QLabel *labelMode;
+    QLabel *labelIv;
 
     QFileDialog *fdCipher;
-    QFileDialog *fdPrivateKey;
+    QFileDialog *fdKey;
 
     QLineEdit *lePlain;
     QLineEdit *leCipher;
-    QLineEdit *lePrivatekey;
+    QLineEdit *leKey;
+    QLineEdit *leIv;
 
     QMessageBox *mb;
 
@@ -52,6 +60,7 @@ private:
     ElGamal *elGamal;
     Rabin *rabin;
     RSA2 *rsa;
+    AES *aes;
 
     QGridLayout *gl;
 
@@ -61,6 +70,7 @@ public slots:
     void computeRSAOAEP();
     void computeElGamal();
     void computeRabin();
+    void computeAES();
 
 signals:
     void clickedCompute();

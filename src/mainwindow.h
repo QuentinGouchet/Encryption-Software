@@ -51,7 +51,7 @@ signals:
     void hashSelected(int);
     void generateKeySelected(int);
     void cipherSelected(int,int);
-    void decipherSelected(int);
+    void decipherSelected(int,int);
     void signSelected(int);
     void verifSelected(int);
     

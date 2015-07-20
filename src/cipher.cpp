@@ -16,8 +16,11 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
     this->setWindowTitle("Cipher");
 
     labelPlain = new QLabel("Choose file to cipher :",this);
-    labelCipher = new QLabel("Name the output file :",this);
-    labelKey = new QLabel("Choose which key to use :",this);
+    labelCipher = new QLabel("Name the output file :",this);    
+    if(public_cipher)
+        labelKey = new QLabel("Choose which key to use :",this);
+    else
+        labelKey = new QLabel("Type in your passphrase :", this);
     labelMode = new QLabel("Block chaining mode and size :");
     labelIv = new QLabel("Enter IV :", this);
 
@@ -101,21 +104,25 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
         case 0:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeRSA()));
             comboMode->setEnabled(false);
+            comboSize->setEnabled(false);
             leIv->setEnabled(false);
             break;
         case 1:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeElGamal()));
             comboMode->setEnabled(false);
+            comboSize->setEnabled(false);
             leIv->setEnabled(false);
             break;
         case 2:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeRabin()));
             comboMode->setEnabled(false);
+            comboSize->setEnabled(false);
             leIv->setEnabled(false);
             break;
         case 3:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeRSAOAEP()));
             comboMode->setEnabled(false);
+            comboSize->setEnabled(false);
             leIv->setEnabled(false);
             break;
         case 4:
@@ -406,7 +413,17 @@ void Cipher::computeAES(){
         if(!(strcmp(comboMode->currentText().toLocal8Bit().constData(), "CBC") ||
                 strcmp(comboSize->currentText().toLocal8Bit().constData(), "128")))
         {
+            printf("AES128 encryption\n");
             rep = aes->aes_cbc_128_encrypt(lePlain->text().toLocal8Bit().constData(),
+                               (const char *) pass,
+                               leCipher->text().toLocal8Bit().constData(),
+                               leIv->text().toLocal8Bit().constData());
+        }
+        else if(!(strcmp(comboMode->currentText().toLocal8Bit().constData(), "CBC") ||
+                  strcmp(comboSize->currentText().toLocal8Bit().constData(), "256")))
+        {
+            printf("AES256 encryption\n");
+            rep = aes->aes_cbc_256_encrypt(lePlain->text().toLocal8Bit().constData(),
                                (const char *) pass,
                                leCipher->text().toLocal8Bit().constData(),
                                leIv->text().toLocal8Bit().constData());
@@ -414,7 +431,7 @@ void Cipher::computeAES(){
 
         if(rep == 1){
             mb = new QMessageBox(this);
-            mb->setText("Symmetric encryption error.");
+            mb->setText("Symmetric encryption error");
             mb->setWindowTitle("Information");
             mb->exec();
 
@@ -449,10 +466,9 @@ void Cipher::computeAES(){
           this->close();
         }
     }
+
     // not actually needed, it is done by derivePassphrase
     out:
-        if(pass)
-            gcry_free(pass);
         if(hd)
-                gcry_md_close(hd);
+            gcry_md_close(hd);
 }

@@ -56,7 +56,7 @@ MainWindow::MainWindow() : QWidget()
     setFixedSize(1200, 600);
     this->setWindowTitle("Cryptographic Calculator");
 
-    QStringList listHash(QStringList() << "SHA1" << "SHA224" << "SHA-256" << "SHA384" << "SHA-512");
+    QStringList listHash(QStringList() << "SHA1" << "SHA-224" << "SHA-256" << "SHA-384" << "SHA-512");
     QStringList listGenerateKey(QStringList() << "RSA" << "EL GAMAL" << "RABIN" << "DSA" << "AES/TDES");
     QStringList listCipher(QStringList() << "RSA" << "EL GAMAL" << "RABIN" << "RSA-OAEP" << "AES");
     QStringList listDecipher(QStringList() << "RSA" << "RSA-CRT" << "EL GAMAL" << "RABIN" << "RSA-OAEP" << "AES");
@@ -77,7 +77,7 @@ MainWindow::MainWindow() : QWidget()
     buttonDecipher = new QPushButton("Decipher it!", this);
     buttonSign = new QPushButton("Sign it!", this);
     buttonVerify = new QPushButton("Verify it !", this);
-    buttonQuit = new QPushButton("Quit", this);
+    buttonQuit = new QPushButton("Exit", this);
     buttonBrowseFile1 = new QPushButton("B\nr\no\nw\ns\ne", this);
     buttonBrowseFile2 = new QPushButton("B\nr\no\nw\ns\ne", this);
 

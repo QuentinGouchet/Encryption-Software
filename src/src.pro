@@ -36,3 +36,5 @@ HEADERS += \
 LIBS += -lgmp -lgcrypt -lcrypto -Wall
 
 QT += widgets
+
+FORMS +=

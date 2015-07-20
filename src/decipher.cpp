@@ -16,7 +16,10 @@ Decipher::Decipher(int index, int public_cipher): QDialog()
 
     labelCipher = new QLabel("Choose file to decipher :",this);
     labelPlain = new QLabel("Choose where to create output file :",this);
-    labelKey = new QLabel("Choose which private key to use :",this);
+    if(public_cipher)
+        labelKey = new QLabel("Choose which key to use :",this);
+    else
+        labelKey = new QLabel("Type in your passphrase :", this);
     labelMode = new QLabel("Block chaining mode and size :");
     labelIv = new QLabel("Enter IV :", this);
 
@@ -102,22 +105,32 @@ Decipher::Decipher(int index, int public_cipher): QDialog()
     switch(index){
         case 0:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeRSA()));
+            comboMode->setEnabled(false);
+            comboSize->setEnabled(false);
             leIv->setEnabled(false);
             break;
         case 1:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeRSACRT()));
+            comboMode->setEnabled(false);
+            comboSize->setEnabled(false);
             leIv->setEnabled(false);
             break;
         case 2:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeElGamal()));
+            comboMode->setEnabled(false);
+            comboSize->setEnabled(false);
             leIv->setEnabled(false);
             break;
         case 3:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeRabin()));
+            comboMode->setEnabled(false);
+            comboSize->setEnabled(false);
             leIv->setEnabled(false);
             break;
         case 4:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeRSAOAEP()));
+            comboMode->setEnabled(false);
+            comboSize->setEnabled(false);
             leIv->setEnabled(false);
             break;
         case 5:
@@ -443,9 +456,19 @@ void Decipher::computeAES()
         if(!(strcmp(comboMode->currentText().toLocal8Bit().constData(), "CBC") ||
                 strcmp(comboSize->currentText().toLocal8Bit().constData(), "128")))
         {
-            rep = aes->aes_cbc_128_decrypt(lePlain->text().toLocal8Bit().constData(),
+            printf("AES128 decryption\n");
+            rep = aes->aes_cbc_128_decrypt(leCipher->text().toLocal8Bit().constData(),
                                (const char *) pass,
-                               leCipher->text().toLocal8Bit().constData(),
+                               lePlain->text().toLocal8Bit().constData(),
+                               leIv->text().toLocal8Bit().constData());
+        }
+        else if(!(strcmp(comboMode->currentText().toLocal8Bit().constData(), "CBC") ||
+                  strcmp(comboSize->currentText().toLocal8Bit().constData(), "256")))
+        {
+            printf("AES256 decryption\n");
+            rep = aes->aes_cbc_256_decrypt(leCipher->text().toLocal8Bit().constData(),
+                               (const char *) pass,
+                               lePlain->text().toLocal8Bit().constData(),
                                leIv->text().toLocal8Bit().constData());
         }
 
@@ -486,10 +509,9 @@ void Decipher::computeAES()
           this->close();
         }
     }
+
     // not actually needed, it is done by derivePassphrase
     out:
-        if(pass)
-            gcry_free(pass);
         if(hd)
-                gcry_md_close(hd);
+            gcry_md_close(hd);
 }

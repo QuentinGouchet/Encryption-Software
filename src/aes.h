@@ -11,10 +11,9 @@
 #include <string.h>
 
 #include <time.h>
-#include "gcrypt.h"
-
-#include "util.h"
+#include <gcrypt.h>
 #include "error.h"
+#include "util.h"
 
 class AES
 {

@@ -63,7 +63,8 @@ SOURCES       = cipher.cpp \
 		util.cpp \
 		aes.cpp \
 		sha.cpp \
-		error.cpp moc_sign.cpp \
+		error.cpp \
+		des.cpp moc_sign.cpp \
 		moc_mainwindow.cpp \
 		moc_cipher.cpp \
 		moc_decipher.cpp \
@@ -86,6 +87,7 @@ OBJECTS       = cipher.o \
 		aes.o \
 		sha.o \
 		error.o \
+		des.o \
 		moc_sign.o \
 		moc_mainwindow.o \
 		moc_cipher.o \
@@ -161,7 +163,8 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		util.h \
 		aes.h \
 		sha.h \
-		error.h cipher.cpp \
+		error.h \
+		des.h cipher.cpp \
 		sign.cpp \
 		rabin.cpp \
 		mainwindow.cpp \
@@ -176,7 +179,8 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		util.cpp \
 		aes.cpp \
 		sha.cpp \
-		error.cpp
+		error.cpp \
+		des.cpp
 QMAKE_TARGET  = src
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = src
@@ -338,8 +342,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents sign.h rabin.h mainwindow.h cipher.h decipher.h generatekey.h hash.h rsa.h verify.h elgamal.h dsa.h util.h aes.h sha.h error.h $(DISTDIR)/
-	$(COPY_FILE) --parents cipher.cpp sign.cpp rabin.cpp mainwindow.cpp main.cpp decipher.cpp generatekey.cpp hash.cpp rsa.cpp verify.cpp elgamal.cpp dsa.cpp util.cpp aes.cpp sha.cpp error.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents sign.h rabin.h mainwindow.h cipher.h decipher.h generatekey.h hash.h rsa.h verify.h elgamal.h dsa.h util.h aes.h sha.h error.h des.h $(DISTDIR)/
+	$(COPY_FILE) --parents cipher.cpp sign.cpp rabin.cpp mainwindow.cpp main.cpp decipher.cpp generatekey.cpp hash.cpp rsa.cpp verify.cpp elgamal.cpp dsa.cpp util.cpp aes.cpp sha.cpp error.cpp des.cpp $(DISTDIR)/
 
 
 clean:compiler_clean 
@@ -379,6 +383,7 @@ moc_mainwindow.cpp: decipher.h \
 		rsa.h \
 		aes.h \
 		error.h \
+		des.h \
 		cipher.h \
 		sign.h \
 		dsa.h \
@@ -396,6 +401,7 @@ moc_cipher.cpp: rabin.h \
 		elgamal.h \
 		aes.h \
 		error.h \
+		des.h \
 		cipher.h
 	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/EncryptionSoftware/trunk/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include cipher.h -o moc_cipher.cpp
 
@@ -405,6 +411,7 @@ moc_decipher.cpp: rabin.h \
 		rsa.h \
 		aes.h \
 		error.h \
+		des.h \
 		decipher.h
 	/usr/lib64/qt5/bin/moc $(DEFINES) -I/usr/lib64/qt5/mkspecs/linux-g++ -I/home/quentin/Documents/EncryptionSoftware/trunk/src -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/c++/5.1.1 -I/usr/include/c++/5.1.1/x86_64-redhat-linux -I/usr/include/c++/5.1.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/usr/local/include -I/usr/include decipher.h -o moc_decipher.cpp
 
@@ -449,7 +456,8 @@ cipher.o: cipher.cpp cipher.h \
 		rsa.h \
 		elgamal.h \
 		aes.h \
-		error.h
+		error.h \
+		des.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cipher.o cipher.cpp
 
 sign.o: sign.cpp sign.h \
@@ -471,6 +479,7 @@ mainwindow.o: mainwindow.cpp mainwindow.h \
 		rsa.h \
 		aes.h \
 		error.h \
+		des.h \
 		cipher.h \
 		sign.h \
 		dsa.h \
@@ -489,6 +498,7 @@ main.o: main.cpp mainwindow.h \
 		rsa.h \
 		aes.h \
 		error.h \
+		des.h \
 		cipher.h \
 		sign.h \
 		dsa.h \
@@ -505,7 +515,8 @@ decipher.o: decipher.cpp decipher.h \
 		elgamal.h \
 		rsa.h \
 		aes.h \
-		error.h
+		error.h \
+		des.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o decipher.o decipher.cpp
 
 generatekey.o: generatekey.cpp generatekey.h \
@@ -544,8 +555,8 @@ util.o: util.cpp util.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o util.o util.cpp
 
 aes.o: aes.cpp aes.h \
-		util.h \
-		error.h
+		error.h \
+		util.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o aes.o aes.cpp
 
 sha.o: sha.cpp sha.h
@@ -553,6 +564,11 @@ sha.o: sha.cpp sha.h
 
 error.o: error.cpp error.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o error.o error.cpp
+
+des.o: des.cpp des.h \
+		error.h \
+		util.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o des.o des.cpp
 
 moc_sign.o: moc_sign.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_sign.o moc_sign.cpp

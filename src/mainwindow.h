@@ -21,6 +21,8 @@
 
 #include <gcrypt.h>
 
+#include "util.h"
+
 class MainWindow : public QWidget
 {
     Q_OBJECT

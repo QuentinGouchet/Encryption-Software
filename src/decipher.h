@@ -18,6 +18,7 @@
 #include "elgamal.h"
 #include "rsa.h"
 #include "aes.h"
+#include "des.h"
 
 class Decipher : public QDialog
 {
@@ -61,6 +62,7 @@ private:
     Rabin *rabin;
     RSA2 *rsa;
     AES *aes;
+    DES *des;
 
     QGridLayout *gl;
 
@@ -71,6 +73,7 @@ public slots:
     void computeElGamal();
     void computeRabin();
     void computeAES();
+    void computeDES();
 
 signals:
     void clickedCompute();

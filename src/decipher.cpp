@@ -136,6 +136,9 @@ Decipher::Decipher(int index, int public_cipher): QDialog()
         case 5:
             QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeAES()));
             break;
+        case 6:
+            QObject::connect(buttonCompute, SIGNAL(clicked()), this, SLOT(computeDES()));
+            break;
         default:
             this->close();
             break;
@@ -471,6 +474,115 @@ void Decipher::computeAES()
                                lePlain->text().toLocal8Bit().constData(),
                                leIv->text().toLocal8Bit().constData());
         }
+
+        if(rep == 1){
+            mb = new QMessageBox(this);
+            mb->setText("Symmetric encryption error.");
+            mb->setWindowTitle("Information");
+            mb->exec();
+
+        }else{
+            mb = new QMessageBox(this);
+            mb->setWindowTitle("Information");
+            mb->setText("Success");
+            mb->exec();
+            this->close();
+        }
+    }
+    else{
+        /*if(!rePlain->exactMatch(lePlain->text())){
+          mb = new QMessageBox(this);
+          mb->setText("The given plain file is wrong.");
+          mb->setWindowTitle("Information");
+          mb->exec();
+          this->close();
+        }
+        else if(!reKey->exactMatch(leKey->text())){
+          mb = new QMessageBox(this);
+          mb->setText("The given key is wrong.");
+          mb->setWindowTitle("Information");
+          mb->exec();
+          this->close();
+        }*/
+        if(!reCipher->exactMatch(leCipher->text())){
+          mb = new QMessageBox(this);
+          mb->setText("The given name doesn't respect the given format.");
+          mb->setWindowTitle("Information");
+          mb->exec();
+          this->close();
+        }
+    }
+
+    // not actually needed, it is done by derivePassphrase
+    out:
+        if(hd)
+            gcry_md_close(hd);
+}
+
+void Decipher::computeDES()
+{
+    //rePlain = new QRegExp("^[\\w|/]+\\.(plain)$");
+    reCipher = new QRegExp("^[\\w|/]+\\.(cipher)$");
+    // Next line is not needed since we derive the key from the passphrase
+    // reKey = new QRegExp("^[\\w|/]+\\.(key)$");
+
+    // Let's derive the key given by the password
+    fprintf(stdout, "passphrase: %s\n", leKey->text().toLocal8Bit().constData());
+    fprintf(stdout, "size in bytes: %d\n", comboSize->currentText().toInt()/8);
+
+    int keylen = comboSize->currentText().toLocal8Bit().toInt()/8;
+    int pass_len = leKey->text().length();
+
+    fprintf(stdout, "size of pass: %d\n", pass_len);
+
+    Util print;
+
+    int hash_len = gcry_md_get_algo_dlen(GCRY_MD_SHA256);
+
+    unsigned char *pass = (unsigned char *) gcry_malloc_secure(sizeof(unsigned char)*hash_len);
+    strcpy( (char *) pass, leKey->text().toLocal8Bit().constData());
+
+    fprintf(stdout, "pass: ");
+    print.printBuff(pass, hash_len);
+
+    gcry_error_t err = 0;
+    gcry_md_hd_t hd = NULL;
+
+    if(err = gcry_md_open(&hd, GCRY_MD_SHA256, GCRY_MD_FLAG_SECURE))
+    {
+            fprintf (stderr, "Failure to open MD_SHA256: %s/%s\n",
+                                gcry_strsource (err),
+                                gcry_strerror (err));
+            goto out;
+    }
+
+    gcry_md_write(hd, pass, pass_len);
+
+    pass = gcry_md_read(hd, GCRY_MD_SHA256);
+
+    printf("hash_len: %d\n", hash_len);
+
+    fprintf(stdout, "Digest of key: ");
+    print.printBuff(pass, hash_len);
+
+    /*
+        Dans un soucis de contrôle minimaliste des entrées, nous vérifions, avant toutes opérations, que les
+        QLineEdit contienne bien une extension .in pour le fichier d'entrée, une extension .out pour le fi-
+        chier de sortie et une extension .key pour le fichier de clé
+    */
+    if(reCipher->exactMatch(leCipher->text()))
+    {
+        des = new DES();
+
+        if(!(strcmp(comboMode->currentText().toLocal8Bit().constData(), "CBC")))
+        {
+            printf("DES3 decryption\n");
+            rep = des->des3_cbc_decrypt(leCipher->text().toLocal8Bit().constData(),
+                               (const char *) pass,
+                               lePlain->text().toLocal8Bit().constData(),
+                               leIv->text().toLocal8Bit().constData());
+        }
+
 
         if(rep == 1){
             mb = new QMessageBox(this);

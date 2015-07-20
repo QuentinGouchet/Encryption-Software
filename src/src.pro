@@ -14,7 +14,8 @@ SOURCES += \
     util.cpp \
     aes.cpp \
     sha.cpp \
-    error.cpp
+    error.cpp \
+    des.cpp
 
 HEADERS += \
     sign.h \
@@ -31,10 +32,9 @@ HEADERS += \
     util.h \
     aes.h \
     sha.h \
-    error.h
+    error.h \
+    des.h
 
 LIBS += -lgmp -lgcrypt -lcrypto -Wall
 
 QT += widgets
-
-FORMS +=

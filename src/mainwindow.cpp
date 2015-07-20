@@ -57,9 +57,9 @@ MainWindow::MainWindow() : QWidget()
     this->setWindowTitle("Cryptographic Calculator");
 
     QStringList listHash(QStringList() << "SHA1" << "SHA-224" << "SHA-256" << "SHA-384" << "SHA-512");
-    QStringList listGenerateKey(QStringList() << "RSA" << "EL GAMAL" << "RABIN" << "DSA" << "AES/TDES");
-    QStringList listCipher(QStringList() << "RSA" << "EL GAMAL" << "RABIN" << "RSA-OAEP" << "AES");
-    QStringList listDecipher(QStringList() << "RSA" << "RSA-CRT" << "EL GAMAL" << "RABIN" << "RSA-OAEP" << "AES");
+    QStringList listGenerateKey(QStringList() << "RSA" << "EL GAMAL" << "RABIN" << "DSA" << "AES / Triple-DES");
+    QStringList listCipher(QStringList() << "RSA" << "EL GAMAL" << "RABIN" << "RSA-OAEP" << "AES" << "Triple-DES");
+    QStringList listDecipher(QStringList() << "RSA" << "RSA-CRT" << "EL GAMAL" << "RABIN" << "RSA-OAEP" << "AES" << "Triple-DES");
     QStringList listSign(QStringList() << "RSA" << "EL GAMAL" << "DSA");
     QStringList listVerify(QStringList() << "RSA" << "EL GAMAL" << "DSA");
     QStringList listFilter(QStringList() << "*.puKey" << "*.prKey" << "*.plain" << "*.cipher" << "*");
@@ -228,7 +228,7 @@ void MainWindow::openCipher()
 {
     QString alg = comboCipher->currentText();
     int public_cipher = 1;
-    if(alg.compare("AES") == 0 || alg.compare("TDES") == 0)
+    if(alg.compare("AES") == 0 || alg.compare("Triple-DES") == 0)
         public_cipher = 0;
 
     cipher = new Cipher(this->getCipherSelected(), public_cipher);
@@ -241,7 +241,7 @@ void MainWindow::openDecipher()
     QString alg = comboDecipher->currentText();
 
     int public_cipher = 1;
-    if(alg.compare("AES") == 0 || alg.compare("TDES") == 0)
+    if(alg.compare("AES") == 0 || alg.compare("Triple-DES") == 0)
         public_cipher = 0;
 
     decipher = new Decipher(this->getDecipherSelected(), public_cipher);

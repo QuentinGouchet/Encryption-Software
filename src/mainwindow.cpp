@@ -56,7 +56,8 @@ MainWindow::MainWindow() : QWidget()
     setFixedSize(1200, 600);
     this->setWindowTitle("Cryptographic Calculator");
 
-    QStringList listHash(QStringList() << "SHA1" << "SHA-224" << "SHA-256" << "SHA-384" << "SHA-512");
+    QStringList listHash(QStringList() << "SHA1" << "SHA-224" << "SHA-256" << "SHA-384" << "SHA-512" <<
+                         "HMAC-SHA1" << "HMAC-SHA-224" << "HMAC SHA-256" << "HMAC SHA-384" << "HMAC SHA-512");
     QStringList listGenerateKey(QStringList() << "RSA" << "EL GAMAL" << "RABIN" << "DSA" << "AES / Triple-DES");
     QStringList listCipher(QStringList() << "RSA" << "EL GAMAL" << "RABIN" << "RSA-OAEP" << "AES" << "Triple-DES");
     QStringList listDecipher(QStringList() << "RSA" << "RSA-CRT" << "EL GAMAL" << "RABIN" << "RSA-OAEP" << "AES" << "Triple-DES");

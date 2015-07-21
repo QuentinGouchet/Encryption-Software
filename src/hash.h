@@ -15,6 +15,7 @@
 #include <QPlainTextEdit>
 
 #include "sha.h"
+#include "util.h"
 
 class Hash : public QDialog
 {
@@ -29,6 +30,7 @@ private:
 
     QLabel *labelPlain;
     QLabel *labelHash;
+    QLabel *labelKey;
 
     QPushButton *buttonCancel;
     QPushButton *buttonBrowse;
@@ -36,6 +38,7 @@ private:
 
     QLineEdit *lePlain;
     QLineEdit *leHash;
+    QLineEdit *leKey;
 
     QFileDialog *fdPlain;
 
@@ -54,6 +57,11 @@ public slots:
     void hashSHA256();
     void hashSHA384();
     void hashSHA512();
+    void hashHmacSHA1();
+    void hashHmacSHA224();
+    void hashHmacSHA256();
+    void hashHmacSHA384();
+    void hashHmacSHA512();
 
 };
 #endif // HASH_H

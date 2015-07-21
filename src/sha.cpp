@@ -51,7 +51,7 @@ int Sha::computeSha1(const char *plaintextPath, const char *fileNameHash)
             goto out;
         }
 
-        data = (char *) gcry_malloc_secure(fsize);
+        data = (char *) gcry_malloc(fsize);
         if(data == NULL)
         {
             err = 1;
@@ -151,7 +151,7 @@ int Sha::computeSha224(const char *plaintextPath, const char *fileNameHash)
             goto out;
         }
 
-        data = (char *) gcry_malloc_secure(fsize);
+        data = (char *) gcry_malloc(fsize);
         if(data == NULL)
         {
             err = 1;
@@ -251,7 +251,7 @@ int Sha::computeSha256(const char * plaintextPath, const char * fileNameHash)
             goto out;
         }
 
-        data = (char *) gcry_malloc_secure(fsize);
+        data = (char *) gcry_malloc(fsize);
         if(data == NULL)
         {
             err = 1;
@@ -351,7 +351,7 @@ int Sha::computeSha384(const char * plaintextPath, const char * fileNameHash)
             goto out;
         }
 
-        data = (char *) gcry_malloc_secure(fsize);
+        data = (char *) gcry_malloc(fsize);
         if(data == NULL)
         {
             err = 1;
@@ -451,7 +451,7 @@ int Sha::computeSha512(const char * plaintextPath, const char * fileNameHash)
             goto out;
         }
 
-        data = (char *) gcry_malloc_secure(fsize);
+        data = (char *) gcry_malloc(fsize);
         if(data == NULL)
         {
             err = 1;
@@ -491,6 +491,133 @@ int Sha::computeSha512(const char * plaintextPath, const char * fileNameHash)
                 fprintf(hashFile, "%02x", digest[i]);
             fprintf(hashFile, "\n");
        }
+
+    out:
+        if(plaintext)
+            fclose(plaintext);
+        if(hashFile)
+            fclose(hashFile);
+        if(hd)
+            gcry_md_close(hd);
+        if(digest)
+            digest = NULL;
+        if(data)
+           gcry_free(data);
+
+        return err;
+    }
+}
+
+int Sha::computeHmacSha1(const char *plaintextPath, const char *fileNameHash, const char *key)
+{
+    FILE *plaintext;
+    FILE *hashFile;
+
+    int i, err = 0;
+    long fsize;
+    int hash_len;
+    char *data;
+
+    gcry_md_hd_t hd = NULL;
+
+    unsigned char *digest = NULL;
+    char pathHash[100];
+
+    if(0 != gcry_mac_test_algo(GCRY_MAC_HMAC_SHA1))
+    {
+        fprintf(stderr, "Algo not availble\n");
+        goto out;
+    }
+
+    if((hash_len = gcry_md_get_algo_dlen(GCRY_MD_SHA1)) < 0)
+    {
+        err = 1;
+        fprintf(stderr, "Could not get length of algorithm\n");
+        goto out;
+    }
+
+    if((plaintext = fopen(plaintextPath, "r")) == NULL)
+    {
+        err = 1;
+        goto out;
+    }
+    else
+    {
+        if(fseek(plaintext, 0, SEEK_END))
+        {
+            err = 1;
+            fprintf(stderr, "Failure on fseek()\n");
+            goto out;
+        }
+        if((fsize = ftell(plaintext)) == -1L)
+        {
+            err = 1;
+            fprintf(stderr, "Failure on ftell()\n");
+            goto out;
+        }
+        if(fseek(plaintext, 0, SEEK_SET))
+        {
+            err = 1;
+            fprintf(stderr, "Failure on fseek()\n");
+            goto out;
+        }
+
+        data = (char *) gcry_malloc(fsize);
+        if(data == NULL)
+        {
+            err = 1;
+            fprintf(stderr, "Failure on gcry_malloc()\n");
+            goto out;
+        }
+
+        if(!fread(data, fsize, 1, plaintext))
+        {
+            err = 1;
+            fprintf(stderr, "Failure on fread()\n");
+            goto out;
+        }
+
+       if(gcry_md_open(&hd, GCRY_MD_SHA1, GCRY_MD_FLAG_HMAC))
+       {
+           err = 1;
+           fprintf(stderr, "Failure on gcry_md_open()\n");
+           goto out;
+       }
+
+       if(gcry_md_setkey(hd, key, hash_len))
+       {
+           err = 1;
+           fprintf(stderr, "Failure on gcry_md_setkey()\n");
+           goto out;
+       }
+
+       Util print;
+       print.printBuff((unsigned char *)key, hash_len);
+
+       gcry_md_write(hd, data, fsize);
+
+       digest = gcry_md_read(hd, GCRY_MD_SHA1);
+
+       if(sprintf(pathHash, "../ressources/%s.hmac", fileNameHash) < 0)
+        {
+            err = 1;
+            fprintf(stderr, "Failure on sprintf()\n");
+            goto out;
+        }
+
+        // Store the hash in a file
+        if((hashFile = fopen(pathHash, "w")) == NULL)
+        {
+            err = 1;
+            fprintf(stderr, "Failure on fopen()\n");
+            goto out;
+        }
+         else
+        {
+            for(i=0; i<hash_len; i++)
+                fprintf(hashFile, "%02x", digest[i]);
+            fprintf(hashFile, "\n");
+        }
 
     out:
         if(plaintext)

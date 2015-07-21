@@ -474,6 +474,8 @@ void Cipher::computeAES(){
     out:
         if(hd)
             gcry_md_close(hd);
+        if(pass)
+            gcry_free(pass);
 }
 
 void Cipher::computeDES()

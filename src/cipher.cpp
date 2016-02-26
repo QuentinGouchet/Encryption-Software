@@ -10,6 +10,14 @@ Cipher::Cipher(): QDialog() {}
     4 - "AES-CBC-128"
 */
 
+void Cipher::hideIvBox()
+{
+    if(leIv->isEnabled())
+        leIv->setEnabled(false);
+    else
+        leIv->setEnabled(true);
+}
+
 Cipher::Cipher(int index, int public_cipher): QDialog()
 {
     setFixedSize(800, 400);
@@ -48,6 +56,9 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
         leKey->setEchoMode(QLineEdit::Password);
 
     leIv = new QLineEdit(this);
+    leIv->setEnabled(false);
+
+    radioIv = new QRadioButton(tr("Manually enter IV"));
 
     fdPlain = new QFileDialog(this);
     fdKey = new QFileDialog(this);
@@ -82,6 +93,7 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
 
     gl->addWidget(labelIv, 3, 0);
     gl->addWidget(leIv, 3, 1);
+    gl->addWidget(radioIv, 3, 2);
 
     gl->addWidget(labelCipher, 4, 0);
     gl->addWidget(leCipher, 4, 1);
@@ -90,6 +102,8 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
     gl->addWidget(buttonCompute, 5, 2);
 
     this->setLayout(gl);
+
+    QObject::connect(radioIv,SIGNAL(clicked()), this, SLOT(hideIvBox()));
 
     QObject::connect(buttonCancel,SIGNAL(clicked()),this,SLOT(close()));
     QObject::connect(buttonBrowsePlain, SIGNAL(clicked()), fdPlain, SLOT(exec()));
@@ -372,6 +386,23 @@ void Cipher::computeAES(){
     int keylen = comboSize->currentText().toLocal8Bit().toInt()/8;
     int pass_len = leKey->text().length();
 
+    // Here check whether adioIv is checked and if not randomly generate IV and store in the file
+    /*unsigned char *iv;
+    int ivSize = comboSize->currentText().toInt();
+   if(!radioIv->isChecked())
+    {
+        iv = (unsigned char *) malloc(ivSize*sizeof(unsigned char));
+        gcry_randomize(&iv, ivSize, GCRY_STRONG_RANDOM);
+        Util print;
+        print.printBuff(iv, ivSize);
+    }
+    else
+        iv = (unsigned char *) leIv->text().toLocal8Bit().constData();
+
+    printf("we pass here\n");*/
+
+
+
     fprintf(stdout, "size of pass: %d\n", pass_len);
 
     Util print;
@@ -476,6 +507,8 @@ void Cipher::computeAES(){
             gcry_md_close(hd);
         if(pass)
             gcry_free(pass);
+        /*if(iv)
+            free(iv);*/
 }
 
 void Cipher::computeDES()

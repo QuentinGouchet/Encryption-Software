@@ -13,6 +13,7 @@
 #include <QRegExp>
 #include <QMessageBox>
 #include <QComboBox>
+#include <QRadioButton>
 
 #include "rabin.h"
 #include "rsa.h"
@@ -61,6 +62,8 @@ private:
 
     QGridLayout *gl;
 
+    QRadioButton *radioIv;
+
     RSA2 *rsa;
     ElGamal *elGamal;
     Rabin *rabin;
@@ -73,6 +76,7 @@ public slots:
     void computeRabin();
     void computeRSAOAEP();
     void computeAES();
-    void computeDES();
+    void computeDES();    
+    void hideIvBox();
 };
 #endif // CIPHER_H

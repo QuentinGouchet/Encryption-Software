@@ -523,11 +523,11 @@ int Sha::computeHmacSha1(const char *plaintextPath, const char *fileNameHash, co
     unsigned char *digest = NULL;
     char pathHash[100];
 
-    if(0 != gcry_mac_test_algo(GCRY_MAC_HMAC_SHA1))
+   /* if(0 != gcry_mac_test_algo(GCRY_MAC_HMAC_SHA1))
     {
-        fprintf(stderr, "Algo not availble\n");
+        fprintf(stderr, "Algo not available\n");
         goto out;
-    }
+    }*/
 
     if((hash_len = gcry_md_get_algo_dlen(GCRY_MD_SHA1)) < 0)
     {

@@ -469,9 +469,8 @@ void Decipher::computeAES()
         {
             printf("AES256 decryption\n");
             rep = aes->aes_cbc_256_decrypt(leCipher->text().toLocal8Bit().constData(),
-                               (const char *) pass,
-                               lePlain->text().toLocal8Bit().constData(),
-                               leIv->text().toLocal8Bit().constData());
+                                           lePlain->text().toLocal8Bit().constData(),
+                                           (const char *) pass);
         }
 
         if(rep == 1){

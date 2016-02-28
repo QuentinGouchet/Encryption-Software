@@ -54,6 +54,7 @@ int AES::aes_cbc_128_encrypt(const char *plaintextPath, const char *cipherPath,
     FILE *plaintextFile = NULL;
     FILE *ciphertextFile = NULL;
 
+    int keylen = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES128);
     int blklen = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES128);
 
     unsigned char *fileContent = NULL;
@@ -69,10 +70,10 @@ int AES::aes_cbc_128_encrypt(const char *plaintextPath, const char *cipherPath,
 
     Util print;
 
-    printf("iv: ");
+    /*printf("iv: ");
     print.printBuff((unsigned char *)iv, blklen);
     printf("key: ");
-    print.printBuff((unsigned char *)key, blklen);
+    print.printBuff((unsigned char *)key, blklen);*/
 
     if((plaintextFile = fopen(plaintextPath, "r")) == NULL)
     {
@@ -100,7 +101,7 @@ int AES::aes_cbc_128_encrypt(const char *plaintextPath, const char *cipherPath,
     ciphertext_len = (plaintext_len % blklen == 0) ? plaintext_len + blklen :
                      plaintext_len + (blklen - (plaintext_len % blklen));
 
-    fprintf(stdout, "ciphertext: %d\n", ciphertext_len);
+    //fprintf(stdout, "ciphertext: %d\n", ciphertext_len);
 
     if(fseek(plaintextFile, 0, SEEK_SET))
     {
@@ -148,7 +149,7 @@ int AES::aes_cbc_128_encrypt(const char *plaintextPath, const char *cipherPath,
     err = gcry_cipher_setiv(hd, iv, blklen);
 
     if(err)
-     {
+    {
         err = 1;
         fprintf(stderr, "gcry_cipher_setkey() error\n");
         goto out;
@@ -182,7 +183,7 @@ int AES::aes_cbc_128_encrypt(const char *plaintextPath, const char *cipherPath,
     printf("%s\n", pathCipherFile);
 
     // start by writing the 16 bytes IV in the file
-    if(16 != fwrite(iv, 1, 16, ciphertextFile))
+    if(blklen != fwrite(iv, 1, blklen, ciphertextFile))
     {
         err = 1;
         fprintf(stderr, "Could not write IV into cipher file\n");
@@ -382,19 +383,19 @@ int AES::aes_cbc_128_decrypt(const char *ciphertextPath, const char *plaintextPa
             fclose(ciphertextFile);
         if(fileContent)
             gcry_free(fileContent);
-        /*if(iv)
-            gcry_free(iv);*/
+        if(iv)
+            gcry_free(iv);
         return err;
 }
 
-int AES::aes_cbc_256_encrypt(const char *plaintextPath, const char *key,
-                     const char *cipherPath, const char *iv)
+int AES::aes_cbc_256_encrypt(const char *plaintextPath, const char *cipherPath,
+                             const char *key, const char *iv)
 {
     FILE *plaintextFile = NULL;
     FILE *ciphertextFile = NULL;
 
     int keylen = gcry_cipher_get_algo_keylen(GCRY_CIPHER_AES256);
-    int blklen  =gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES256);
+    int blklen = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES256);
 
     unsigned char *fileContent = NULL;
     unsigned char *ciphertext = NULL;
@@ -409,12 +410,12 @@ int AES::aes_cbc_256_encrypt(const char *plaintextPath, const char *key,
 
     Util print;
 
-    printf("blklen: %d\n", blklen);
+    /*printf("blklen: %d\n", blklen);
 
     printf("iv: ");
     print.printBuff((unsigned char *)iv, blklen);
     printf("key: ");
-    print.printBuff((unsigned char *)key, blklen);
+    print.printBuff((unsigned char *)key, blklen);*/
 
     if((plaintextFile = fopen(plaintextPath, "r")) == NULL)
     {
@@ -442,7 +443,7 @@ int AES::aes_cbc_256_encrypt(const char *plaintextPath, const char *key,
     ciphertext_len = (plaintext_len % blklen == 0) ? plaintext_len + blklen :
                      plaintext_len + (blklen - (plaintext_len % blklen));
 
-    fprintf(stdout, "ciphertext: %d\n", ciphertext_len);
+    //fprintf(stdout, "ciphertext: %d\n", ciphertext_len);
 
     if(fseek(plaintextFile, 0, SEEK_SET))
     {
@@ -490,7 +491,7 @@ int AES::aes_cbc_256_encrypt(const char *plaintextPath, const char *key,
     err = gcry_cipher_setiv(hd, iv, blklen);
 
     if(err)
-     {
+    {
         err = 1;
         fprintf(stderr, "gcry_cipher_setkey() error\n");
         goto out;
@@ -500,7 +501,7 @@ int AES::aes_cbc_256_encrypt(const char *plaintextPath, const char *key,
 
     err = gcry_cipher_encrypt(hd, fileContent, ciphertext_len, NULL, 0);
 
-    fprintf(stdout, "FileContent: ");
+    //fprintf(stdout, "FileContent: ");
     //print.printBuff(fileContent, ciphertext_len);
 
     if(err)
@@ -522,6 +523,14 @@ int AES::aes_cbc_256_encrypt(const char *plaintextPath, const char *key,
     }
 
     printf("%s\n", pathCipherFile);
+
+    // start by writing the 16 bytes IV in the file
+    if(blklen != fwrite(iv, 1, blklen, ciphertextFile))
+    {
+        err = 1;
+        fprintf(stderr, "Could not write IV into cipher file\n");
+        goto out;
+    }
 
     if(ciphertext_len != fwrite(fileContent, 1, ciphertext_len, ciphertextFile))
     {
@@ -545,8 +554,7 @@ int AES::aes_cbc_256_encrypt(const char *plaintextPath, const char *key,
         return err;
 }
 
-int AES::aes_cbc_256_decrypt(const char *ciphertextPath, const char *key,
-                     const char *plaintextPath, const char *iv)
+int AES::aes_cbc_256_decrypt(const char *ciphertextPath, const char *plaintextPath, const char *key)
 {
     FILE *plaintextFile = NULL;
     FILE *ciphertextFile = NULL;
@@ -567,12 +575,14 @@ int AES::aes_cbc_256_decrypt(const char *ciphertextPath, const char *key,
 
     Util print;
 
-    printf("iv: ");
-    print.printBuff((unsigned char *)iv, blklen);
+    //printf("iv: ");
+    //print.printBuff((unsigned char *)iv, blklen);
     printf("key: ");
     print.printBuff((unsigned char *)key, blklen);
 
     printf("ciphertextpath: %s\n", ciphertextPath);
+
+    unsigned char *iv = (unsigned char *) gcry_malloc(blklen*sizeof(unsigned char));
 
     if((ciphertextFile = fopen(ciphertextPath, "r")) == NULL)
     {
@@ -595,7 +605,7 @@ int AES::aes_cbc_256_decrypt(const char *ciphertextPath, const char *key,
         goto out;
     }
 
-    ciphertext_len = fsize;
+    ciphertext_len = fsize - blklen;
 
     fprintf(stdout, "ciphertext: %d\n", ciphertext_len);
 
@@ -611,6 +621,14 @@ int AES::aes_cbc_256_decrypt(const char *ciphertextPath, const char *key,
     {
         err = 1;
         fprintf(stderr, "Could not allocate memory\n");
+        goto out;
+    }
+
+
+    if(fread(iv, 1, blklen, ciphertextFile) != blklen)
+    {
+        err = 1;
+        fprintf(stderr, "fread() failure on ciphertext file\n");
         goto out;
     }
 

@@ -389,7 +389,7 @@ void Cipher::computeAES(){
     reIv = new QRegExp("[a-fA-F0-9]+");
 
     // Let's derive the key given by the password
-    if( (leKey->text().isEmpty() || lePlain->text().isEmpty() || leCipher->text().isEmpty() || leIv->text().size() != 16) )
+    if( (leKey->text().isEmpty() || lePlain->text().isEmpty() || leCipher->text().isEmpty() || leIv->text().size() != 16 && radioIv->isChecked()) )
     {
         mb = new QMessageBox(this);
         mb->setWindowTitle("Information");
@@ -456,7 +456,7 @@ void Cipher::computeAES(){
         QLineEdit contienne bien une extension .in pour le fichier d'entrée, une extension .out pour le fi-
         chier de sortie et une extension .key pour le fichier de clé
     */
-    if(!reIv->exactMatch(leIv->text()))
+    if(!reIv->exactMatch(leIv->text()) && radioIv->isChecked())
     {
       mb = new QMessageBox(this);
       mb->setText("The IV field is incorrect");
@@ -480,11 +480,10 @@ void Cipher::computeAES(){
         else if(!(strcmp(comboMode->currentText().toLocal8Bit().constData(), "CBC") ||
                   strcmp(comboSize->currentText().toLocal8Bit().constData(), "256")))
         {
-            printf("AES-256 encryption\n");
+            printf("AES-256-CBC encryption\n");
             rep = aes->aes_cbc_256_encrypt(lePlain->text().toLocal8Bit().constData(),
-                               (const char *) pass,
-                               leCipher->text().toLocal8Bit().constData(),
-                               leIv->text().toLocal8Bit().constData());
+                                           leCipher->text().toLocal8Bit().constData(),
+                                           (const char *) pass, (const char *) iv);
         }
 
         if(rep == 1){

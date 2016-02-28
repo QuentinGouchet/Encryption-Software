@@ -48,8 +48,8 @@ int AES::generateKey(unsigned int nbits, const char *root_keys)
     return err;
 }
 
-int AES::aes_cbc_128_encrypt(const char *plaintextPath, const char *key,
-                     const char *cipherPath, const char *iv)
+int AES::aes_cbc_128_encrypt(const char *plaintextPath, const char *cipherPath,
+                             const char *key, const char *iv)
 {
     FILE *plaintextFile = NULL;
     FILE *ciphertextFile = NULL;
@@ -126,8 +126,8 @@ int AES::aes_cbc_128_encrypt(const char *plaintextPath, const char *key,
 
     fileContent[plaintext_len] = 0x10;
 
-    fprintf(stdout, "FileContent: ");
-    print.printBuff(fileContent, ciphertext_len);
+    //fprintf(stdout, "FileContent: ");
+    //print.printBuff(fileContent, ciphertext_len);
 
     err = gcry_cipher_open(&hd, GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CBC, 0);
     if(err)
@@ -158,8 +158,8 @@ int AES::aes_cbc_128_encrypt(const char *plaintextPath, const char *key,
 
     err = gcry_cipher_encrypt(hd, fileContent, ciphertext_len, NULL, 0);
 
-    fprintf(stdout, "FileContent: ");
-    print.printBuff(fileContent, ciphertext_len);
+    //fprintf(stdout, "FileContent: ");
+    //print.printBuff(fileContent, ciphertext_len);
 
     if(err)
     {
@@ -180,6 +180,14 @@ int AES::aes_cbc_128_encrypt(const char *plaintextPath, const char *key,
     }
 
     printf("%s\n", pathCipherFile);
+
+    // start by writing the 16 bytes IV in the file
+    if(16 != fwrite(iv, 1, 16, ciphertextFile))
+    {
+        err = 1;
+        fprintf(stderr, "Could not write IV into cipher file\n");
+        goto out;
+    }
 
     if(ciphertext_len != fwrite(fileContent, 1, ciphertext_len, ciphertextFile))
     {
@@ -203,8 +211,7 @@ int AES::aes_cbc_128_encrypt(const char *plaintextPath, const char *key,
         return err;
 }
 
-int AES::aes_cbc_128_decrypt(const char *ciphertextPath, const char *key,
-                     const char *plaintextPath, const char *iv)
+int AES::aes_cbc_128_decrypt(const char *ciphertextPath, const char *plaintextPath, const char *key)
 {
     FILE *plaintextFile = NULL;
     FILE *ciphertextFile = NULL;
@@ -212,24 +219,24 @@ int AES::aes_cbc_128_decrypt(const char *ciphertextPath, const char *key,
     int blklen = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES128);
 
     unsigned char *fileContent = NULL;
-    unsigned char *ciphertext = NULL;
+    //unsigned char *ciphertext = NULL;
 
     char pathPlainFile[50];
 
     long fsize = 0;
-    int plaintext_len, ciphertext_len, i;
+    int plaintext_len, ciphertext_len;
 
     gcry_cipher_hd_t hd = NULL;
     gcry_error_t err = 0;
 
     Util print;
 
-    printf("iv: ");
-    print.printBuff((unsigned char *)iv, blklen);
     printf("key: ");
     print.printBuff((unsigned char *)key, blklen);
 
     printf("ciphertextpath: %s\n", ciphertextPath);
+
+    unsigned char *iv = (unsigned char *) gcry_malloc(blklen*sizeof(unsigned char));
 
     if((ciphertextFile = fopen(ciphertextPath, "r")) == NULL)
     {
@@ -252,7 +259,7 @@ int AES::aes_cbc_128_decrypt(const char *ciphertextPath, const char *key,
         goto out;
     }
 
-    ciphertext_len = fsize;
+    ciphertext_len = fsize - blklen;
 
     fprintf(stdout, "ciphertext: %d\n", ciphertext_len);
 
@@ -268,6 +275,13 @@ int AES::aes_cbc_128_decrypt(const char *ciphertextPath, const char *key,
     {
         err = 1;
         fprintf(stderr, "Could not allocate memory\n");
+        goto out;
+    }
+
+    if(fread(iv, 1, blklen, ciphertextFile) != blklen)
+    {
+        err = 1;
+        fprintf(stderr, "fread() failure on ciphertext file\n");
         goto out;
     }
 
@@ -368,6 +382,8 @@ int AES::aes_cbc_128_decrypt(const char *ciphertextPath, const char *key,
             fclose(ciphertextFile);
         if(fileContent)
             gcry_free(fileContent);
+        /*if(iv)
+            gcry_free(iv);*/
         return err;
 }
 

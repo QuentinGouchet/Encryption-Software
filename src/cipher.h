@@ -57,6 +57,7 @@ private:
     QRegExp *rePlain;
     QRegExp *reCipher;
     QRegExp *reKey;
+    QRegExp *reIv;
 
     QMessageBox *mb;
 

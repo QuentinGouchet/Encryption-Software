@@ -21,7 +21,7 @@ Decipher::Decipher(int index, int public_cipher): QDialog()
     else
         labelKey = new QLabel("Type in your passphrase :", this);
     labelMode = new QLabel("Block chaining mode and size :");
-    labelIv = new QLabel("Enter IV :", this);
+    //labelIv = new QLabel("Enter IV :", this);
 
     buttonBrowseCipher = new QPushButton("Browse", this);
     if(public_cipher)
@@ -46,7 +46,7 @@ Decipher::Decipher(int index, int public_cipher): QDialog()
     if(!public_cipher)
         leKey->setEchoMode(QLineEdit::Password);
 
-    leIv = new QLineEdit(this);
+    //leIv = new QLineEdit(this);
 
     fdCipher = new QFileDialog(this);
     fdKey = new QFileDialog(this);
@@ -82,8 +82,8 @@ Decipher::Decipher(int index, int public_cipher): QDialog()
     gl->addWidget(comboMode, 2, 1);
     gl->addWidget(comboSize, 2, 2);
 
-    gl->addWidget(labelIv, 3, 0);
-    gl->addWidget(leIv, 3, 1);
+    /*gl->addWidget(labelIv, 3, 0);
+    gl->addWidget(leIv, 3, 1);*/
 
     gl->addWidget(labelPlain, 4, 0);
     gl->addWidget(lePlain, 4, 1);
@@ -459,11 +459,10 @@ void Decipher::computeAES()
         if(!(strcmp(comboMode->currentText().toLocal8Bit().constData(), "CBC") ||
                 strcmp(comboSize->currentText().toLocal8Bit().constData(), "128")))
         {
-            printf("AES128 decryption\n");
+            printf("AES-128-CBC decryption\n");
             rep = aes->aes_cbc_128_decrypt(leCipher->text().toLocal8Bit().constData(),
-                               (const char *) pass,
-                               lePlain->text().toLocal8Bit().constData(),
-                               leIv->text().toLocal8Bit().constData());
+                                           lePlain->text().toLocal8Bit().constData(),
+                                           (const char *) pass);
         }
         else if(!(strcmp(comboMode->currentText().toLocal8Bit().constData(), "CBC") ||
                   strcmp(comboSize->currentText().toLocal8Bit().constData(), "256")))

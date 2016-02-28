@@ -92,6 +92,13 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
     gl->addWidget(comboSize, 2, 2);
 
     gl->addWidget(labelIv, 3, 0);
+
+    // index == 4 is AES; we want a 128 bits IV only
+    if(index == 4)
+        leIv->setMaxLength(gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES));
+    // index = 5 3DES, IV is 64 bits
+    else if(index == 5)
+        leIv->setMaxLength(gcry_cipher_get_algo_blklen(GCRY_CIPHER_3DES));
     gl->addWidget(leIv, 3, 1);
     gl->addWidget(radioIv, 3, 2);
 
@@ -379,33 +386,42 @@ void Cipher::computeAES(){
     // Next line is not needed since we derive the key from the passphrase
     // reKey = new QRegExp("^[\\w|/]+\\.(key)$");
 
+    reIv = new QRegExp("[a-fA-F0-9]+");
+
     // Let's derive the key given by the password
+    if( (leKey->text().isEmpty() || lePlain->text().isEmpty() || leCipher->text().isEmpty() || leIv->text().size() != 16) )
+    {
+        mb = new QMessageBox(this);
+        mb->setWindowTitle("Information");
+        mb->setText("One field is still empty!");
+        mb->exec();
+        return ;
+    }
+
     fprintf(stdout, "passphrase: %s\n", leKey->text().toLocal8Bit().constData());
     fprintf(stdout, "size in bytes: %d\n", comboSize->currentText().toInt()/8);
 
     int keylen = comboSize->currentText().toLocal8Bit().toInt()/8;
     int pass_len = leKey->text().length();
 
-    // Here check whether adioIv is checked and if not randomly generate IV and store in the file
-    /*unsigned char *iv;
-    int ivSize = comboSize->currentText().toInt();
-   if(!radioIv->isChecked())
+    // Here check whether radioIv is checked and if not randomly generate IV and store in the file
+    unsigned char *iv = NULL;
+    int ivSize = 16;
+    if(!radioIv->isChecked())
     {
-        iv = (unsigned char *) malloc(ivSize*sizeof(unsigned char));
-        gcry_randomize(&iv, ivSize, GCRY_STRONG_RANDOM);
+        iv = (unsigned char *) gcry_malloc(ivSize*sizeof(unsigned char));
+        gcry_randomize(iv, ivSize, GCRY_STRONG_RANDOM);
         Util print;
         print.printBuff(iv, ivSize);
     }
     else
         iv = (unsigned char *) leIv->text().toLocal8Bit().constData();
 
-    printf("we pass here\n");*/
-
-
-
     fprintf(stdout, "size of pass: %d\n", pass_len);
 
     Util print;
+    printf("iv: ");
+    print.printBuff(iv, ivSize);
 
     int hash_len = gcry_md_get_algo_dlen(GCRY_MD_SHA256);
 
@@ -440,6 +456,15 @@ void Cipher::computeAES(){
         QLineEdit contienne bien une extension .in pour le fichier d'entrée, une extension .out pour le fi-
         chier de sortie et une extension .key pour le fichier de clé
     */
+    if(!reIv->exactMatch(leIv->text()))
+    {
+      mb = new QMessageBox(this);
+      mb->setText("The IV field is incorrect");
+      mb->setWindowTitle("Information");
+      mb->exec();
+    return ;
+    }
+
     if(reCipher->exactMatch(leCipher->text()))
     {
         aes = new AES();
@@ -447,16 +472,15 @@ void Cipher::computeAES(){
         if(!(strcmp(comboMode->currentText().toLocal8Bit().constData(), "CBC") ||
                 strcmp(comboSize->currentText().toLocal8Bit().constData(), "128")))
         {
-            printf("AES128 encryption\n");
+            printf("AES-128-CBC encryption\n");
             rep = aes->aes_cbc_128_encrypt(lePlain->text().toLocal8Bit().constData(),
-                               (const char *) pass,
-                               leCipher->text().toLocal8Bit().constData(),
-                               leIv->text().toLocal8Bit().constData());
+                                           leCipher->text().toLocal8Bit().constData(),
+                                           (const char *) pass, (const char*) iv);
         }
         else if(!(strcmp(comboMode->currentText().toLocal8Bit().constData(), "CBC") ||
                   strcmp(comboSize->currentText().toLocal8Bit().constData(), "256")))
         {
-            printf("AES256 encryption\n");
+            printf("AES-256 encryption\n");
             rep = aes->aes_cbc_256_encrypt(lePlain->text().toLocal8Bit().constData(),
                                (const char *) pass,
                                leCipher->text().toLocal8Bit().constData(),
@@ -502,11 +526,16 @@ void Cipher::computeAES(){
     }
 
     // not actually needed, it is done by derivePassphrase
+    // why is gcry_free(pass) failing?
     out:
-        if(hd)
+
+    if(hd)
+        gcry_md_close(hd);
+    return ;
+       /* if(hd)
             gcry_md_close(hd);
         if(pass)
-            gcry_free(pass);
+            gcry_free(pass);*/
         /*if(iv)
             free(iv);*/
 }

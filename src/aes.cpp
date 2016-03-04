@@ -395,7 +395,7 @@ int AES::aes_cbc_256_encrypt(const char *plaintextPath, const char *cipherPath,
     FILE *ciphertextFile = NULL;
 
     int keylen = gcry_cipher_get_algo_keylen(GCRY_CIPHER_AES256);
-    int blklen = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES256);
+    int blklen = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES);
 
     unsigned char *fileContent = NULL;
     unsigned char *ciphertext = NULL;

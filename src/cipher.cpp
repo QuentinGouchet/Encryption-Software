@@ -403,16 +403,14 @@ void Cipher::computeAES(){
 
     int keylen = comboSize->currentText().toLocal8Bit().toInt()/8;
     int pass_len = leKey->text().length();
-
+        Util print;
     // Here check whether radioIv is checked and if not randomly generate IV and store in the file
     unsigned char *iv = NULL;
-    int ivSize = 16;
+    int blklen = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES);
     if(!radioIv->isChecked())
     {
-        iv = (unsigned char *) gcry_malloc(ivSize*sizeof(unsigned char));
-        gcry_randomize(iv, ivSize, GCRY_STRONG_RANDOM);
-        Util print;
-        print.printBuff(iv, ivSize);
+        iv = (unsigned char *) gcry_calloc(blklen, sizeof(unsigned char));
+        gcry_randomize(iv, blklen, GCRY_STRONG_RANDOM);
     }
     else
         iv = (unsigned char *) leIv->text().toLocal8Bit().constData();
@@ -421,11 +419,12 @@ void Cipher::computeAES(){
 
     Util print;
     printf("iv: ");
-    print.printBuff(iv, ivSize);
+    print.printBuff(iv, blklen);
+    printf("%u\n", iv);
 
     int hash_len = gcry_md_get_algo_dlen(GCRY_MD_SHA256);
 
-    unsigned char *pass = (unsigned char *) gcry_malloc_secure(sizeof(unsigned char)*hash_len);
+    unsigned char *pass = (unsigned char *) gcry_calloc(sizeof(unsigned char), hash_len);
     strcpy( (char *) pass, leKey->text().toLocal8Bit().constData());
 
     fprintf(stdout, "pass: ");
@@ -444,7 +443,12 @@ void Cipher::computeAES(){
 
     gcry_md_write(hd, pass, pass_len);
 
+    if(pass)
+        gcry_free(pass);
+
     pass = gcry_md_read(hd, GCRY_MD_SHA256);
+
+    print.printBuff(pass, 32);
 
     printf("hash_len: %d\n", hash_len);
 
@@ -530,13 +534,21 @@ void Cipher::computeAES(){
 
     if(hd)
         gcry_md_close(hd);
+
+    memset(pass, 0, hash_len);
+    memset(iv, 0, blklen);
+
+    print.printBuff(pass, hash_len);
+
+    printf("%u\n", iv);
+
+    print.printBuff(iv, blklen);
+
+    if(iv)
+        gcry_free(iv);
+
+    print.printBuff(iv, blklen);
     return ;
-       /* if(hd)
-            gcry_md_close(hd);
-        if(pass)
-            gcry_free(pass);*/
-        /*if(iv)
-            free(iv);*/
 }
 
 void Cipher::computeDES()

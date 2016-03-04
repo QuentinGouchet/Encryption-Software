@@ -35,7 +35,7 @@ MainWindow::MainWindow() : QWidget()
         this->fail();
     }
 
-    if(err = gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0))
+    if(err = gcry_control(GCRYCTL_INITIALIZATION_FINISHED_P, 0))
     {
         fprintf(stderr, "Initialization failed: %s/%s\n",
                                     gcry_strsource (err),
@@ -188,25 +188,25 @@ MainWindow::MainWindow() : QWidget()
 
     this->setLayout(glMain);
 
-    if(err = gcry_control(GCRYCTL_TERM_SECMEM))
+    /*if(err = gcry_control(GCRYCTL_TERM_SECMEM))
     {
         fprintf(stderr, "Initialization failed: %s/%s\n",
                                     gcry_strsource (err),
                                     gcry_strerror (err));
         this->fail();
-    }
+    }*/
 }
 
 void MainWindow::terminate()
 {
     gcry_error_t err = 0;
-    if(err = gcry_control(GCRYCTL_TERM_SECMEM))
+    /*if(err = gcry_control(GCRYCTL_TERM_SECMEM))
     {
         fprintf(stderr, "Initialization failed: %s/%s\n",
                                     gcry_strsource (err),
                                     gcry_strerror (err));
         this->fail();
-    }
+    }*/
 
     close();
 }

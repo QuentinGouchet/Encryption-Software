@@ -21,7 +21,7 @@ class AES
 public:
     AES();
     int generateKey(unsigned int, const char *);
-    int aes_cbc_128_encrypt(const char *, const char *, const char *, const char *);
+    int aes_encrypt(const char *, const char *, int, int, const char *, const char *);
     int aes_cbc_128_decrypt(const char *, const char *, const char *);
     int aes_cbc_256_encrypt(const char *, const char *, const char *, const char *);
     int aes_cbc_256_decrypt(const char *, const char *, const char *);

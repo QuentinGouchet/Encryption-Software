@@ -3,9 +3,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <openssl/conf.h>
-#include <openssl/evp.h>
-#include <openssl/err.h>
 #include <gmp.h>
 
 typedef struct{

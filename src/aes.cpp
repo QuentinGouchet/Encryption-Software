@@ -48,14 +48,15 @@ int AES::generateKey(unsigned int nbits, const char *root_keys)
     return err;
 }
 
-int AES::aes_cbc_128_encrypt(const char *plaintextPath, const char *cipherPath,
-                             const char *key, const char *iv)
+int AES::aes_encrypt(const char *plaintextPath, const char *cipherPath,
+                     int algo, int mode,
+                     const char *key, const char *iv)
 {
     FILE *plaintextFile = NULL;
     FILE *ciphertextFile = NULL;
 
-    int keylen = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES128);
-    int blklen = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES128);
+    int keylen = gcry_cipher_get_algo_blklen(algo);
+    int blklen = gcry_cipher_get_algo_blklen(algo);
 
     unsigned char *fileContent = NULL;
     unsigned char *ciphertext = NULL;
@@ -130,7 +131,7 @@ int AES::aes_cbc_128_encrypt(const char *plaintextPath, const char *cipherPath,
     //fprintf(stdout, "FileContent: ");
     //print.printBuff(fileContent, ciphertext_len);
 
-    err = gcry_cipher_open(&hd, GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CBC, 0);
+    err = gcry_cipher_open(&hd, algo, mode, 0);
     if(err)
     {
         err = 1;

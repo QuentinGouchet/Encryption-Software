@@ -38,11 +38,19 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
     buttonCancel = new QPushButton("Cancel", this);
     buttonCompute = new QPushButton("Compute", this);
 
-    QStringList listMode(QStringList() << "CBC");
+    //QStringList listMode(QStringList() << "CBC");
     QStringList listSize(QStringList() << "128" << "256");
 
+    if(index == 4)
+    {
+        comboSize->addItem("128", GCRY_CIPHER_AES);
+        comboSize->addItem("256", GCRY_CIPHER_AES256);
+    }
+
     comboMode = new QComboBox(this);
-    comboMode->addItems(listMode);
+    //comboMode->addItems(listMode);
+
+    comboMode->addItem("CBC", GCRY_CIPHER_MODE_CBC);
 
     comboSize = new QComboBox(this);
     comboSize->addItems(listSize);
@@ -99,6 +107,7 @@ Cipher::Cipher(int index, int public_cipher): QDialog()
     // index = 5 3DES, IV is 64 bits
     else if(index == 5)
         leIv->setMaxLength(gcry_cipher_get_algo_blklen(GCRY_CIPHER_3DES));
+
     gl->addWidget(leIv, 3, 1);
     gl->addWidget(radioIv, 3, 2);
 
@@ -381,6 +390,7 @@ void Cipher::computeRSAOAEP(){
 }
 
 void Cipher::computeAES(){
+         Util print;
     //rePlain = new QRegExp("^[\\w|/]+\\.(plain)$");
     reCipher = new QRegExp("([\\w]+)");
     // Next line is not needed since we derive the key from the passphrase
@@ -398,15 +408,13 @@ void Cipher::computeAES(){
         return ;
     }
 
-    fprintf(stdout, "passphrase: %s\n", leKey->text().toLocal8Bit().constData());
-    fprintf(stdout, "size in bytes: %d\n", comboSize->currentText().toInt()/8);
-
     int keylen = comboSize->currentText().toLocal8Bit().toInt()/8;
     int pass_len = leKey->text().length();
-        Util print;
+
     // Here check whether radioIv is checked and if not randomly generate IV and store in the file
     unsigned char *iv = NULL;
     int blklen = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES);
+
     if(!radioIv->isChecked())
     {
         iv = (unsigned char *) gcry_calloc(blklen, sizeof(unsigned char));
@@ -415,20 +423,10 @@ void Cipher::computeAES(){
     else
         iv = (unsigned char *) leIv->text().toLocal8Bit().constData();
 
-    fprintf(stdout, "size of pass: %d\n", pass_len);
-
-    Util print;
-    printf("iv: ");
-    print.printBuff(iv, blklen);
-    printf("%u\n", iv);
-
     int hash_len = gcry_md_get_algo_dlen(GCRY_MD_SHA256);
 
     unsigned char *pass = (unsigned char *) gcry_calloc(sizeof(unsigned char), hash_len);
     strcpy( (char *) pass, leKey->text().toLocal8Bit().constData());
-
-    fprintf(stdout, "pass: ");
-    print.printBuff(pass, hash_len);
 
     gcry_error_t err = 0;
     gcry_md_hd_t hd = NULL;
@@ -447,13 +445,6 @@ void Cipher::computeAES(){
         gcry_free(pass);
 
     pass = gcry_md_read(hd, GCRY_MD_SHA256);
-
-    print.printBuff(pass, 32);
-
-    printf("hash_len: %d\n", hash_len);
-
-    fprintf(stdout, "Digest of key: ");
-    print.printBuff(pass, hash_len);
 
     /*
         Dans un soucis de contrôle minimaliste des entrées, nous vérifions, avant toutes opérations, que les
@@ -477,9 +468,10 @@ void Cipher::computeAES(){
                 strcmp(comboSize->currentText().toLocal8Bit().constData(), "128")))
         {
             printf("AES-128-CBC encryption\n");
-            rep = aes->aes_cbc_128_encrypt(lePlain->text().toLocal8Bit().constData(),
-                                           leCipher->text().toLocal8Bit().constData(),
-                                           (const char *) pass, (const char*) iv);
+            rep = aes->aes_encrypt(lePlain->text().toLocal8Bit().constData(),
+                                   leCipher->text().toLocal8Bit().constData(),
+                                   GCRY_CIPHER_AES, comboMode->currentData().toInt(),
+                                   (const char *) pass, (const char*) iv);
         }
         else if(!(strcmp(comboMode->currentText().toLocal8Bit().constData(), "CBC") ||
                   strcmp(comboSize->currentText().toLocal8Bit().constData(), "256")))
@@ -530,24 +522,20 @@ void Cipher::computeAES(){
 
     // not actually needed, it is done by derivePassphrase
     // why is gcry_free(pass) failing?
+
     out:
+    memset(pass, 0, hash_len);
+    memset(iv, 0, blklen);
+
+    leKey->clear();
+    leIv->clear();
 
     if(hd)
         gcry_md_close(hd);
 
-    memset(pass, 0, hash_len);
-    memset(iv, 0, blklen);
-
-    print.printBuff(pass, hash_len);
-
-    printf("%u\n", iv);
-
-    print.printBuff(iv, blklen);
-
-    if(iv)
+    if(iv && !radioIv->isChecked())
         gcry_free(iv);
 
-    print.printBuff(iv, blklen);
     return ;
 }
 
